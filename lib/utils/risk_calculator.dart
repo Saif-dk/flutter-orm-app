@@ -1,7 +1,7 @@
 class RiskCalculator {
   static String calculateORMRisk(List<dynamic> riskEntries) {
     double maxScore = 0;
-    
+
     for (var entry in riskEntries) {
       if (entry is Map<String, dynamic>) {
         final finalValue = (entry['finalRiskValue'] ?? 0.0) as double;
@@ -10,7 +10,7 @@ class RiskCalculator {
         }
       }
     }
-    
+
     return maxScore.toStringAsFixed(1);
   }
 
@@ -47,7 +47,8 @@ class RiskCalculator {
     }
   }
 
-  static double calculateRiskValue(int likelihood, int severity, double deduction) {
+  static double calculateRiskValue(
+      int likelihood, int severity, double deduction) {
     return (likelihood * severity) - deduction;
   }
 
@@ -74,10 +75,15 @@ class RiskCalculator {
   static List<String> getCategories() {
     return [
       'Planning',
-      'Event/Mission',
-      'Asset/Resource',
-      'Comms/Supervision',
-      'Environment/Ground Facilities',
+      'Interface (Human-Machine)',
+      'Leadership & Supervision',
+      'Human Factors',
+      'Communications',
+      'Operations / Mission',
+      'Task Proficiency and Currency',
+      'Equipment',
+      'Regulations / Risk Decisions',
+      'ENVIRONMENT',
     ];
   }
 }

@@ -26,10 +26,15 @@ const List<Map<String, dynamic>> SEVERITY_OPTIONS = [
 
 const List<String> CATEGORIES = [
   'Planning',
-  'Event/Mission',
-  'Asset/Resource',
-  'Comms/Supervision',
-  'Environment/Ground Facilities',
+  'Interface (Human-Machine)',
+  'Leadership & Supervision',
+  'Human Factors',
+  'Communications',
+  'Operations / Mission',
+  'Task Proficiency and Currency',
+  'Equipment',
+  'Regulations / Risk Decisions',
+  'ENVIRONMENT',
 ];
 
 // ---------------------------------------------------------------------------
@@ -71,10 +76,15 @@ Color textColorForCategory(String category) {
 String mapCategoryToStorageKey(String cat) {
   const map = {
     'Planning': 'PLANNING',
-    'Event/Mission': 'EVENT/MISSION',
-    'Asset/Resource': 'ASSET/RESOURCES',
-    'Comms/Supervision': 'COMMS/SUPERVISION',
-    'Environment/Ground Facilities': 'ENVIRONMENT/GROUND FACILITIES',
+    'Interface (Human-Machine)': 'INTERFACE (HUMAN-MACHINE)',
+    'Leadership & Supervision': 'LEADERSHIP & SUPERVISION',
+    'Human Factors': 'HUMAN FACTORS',
+    'Communications': 'COMMUNICATIONS',
+    'Operations / Mission': 'OPERATIONS / MISSION',
+    'Task Proficiency and Currency': 'TASK PROFICIENCY AND CURRENCY',
+    'Equipment': 'EQUIPMENT',
+    'Regulations / Risk Decisions': 'REGULATIONS / RISK DECISIONS',
+    'ENVIRONMENT': 'ENVIRONMENT',
   };
   return map[cat] ?? cat.toUpperCase();
 }

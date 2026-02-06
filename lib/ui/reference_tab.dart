@@ -107,13 +107,17 @@ class _ReferenceTabState extends State<ReferenceTab> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Categories in the order the HTML renders them
     const catOrder = [
       'PLANNING',
-      'EVENT/MISSION',
-      'ASSET/RESOURCES',
-      'COMMS/SUPERVISION',
-      'ENVIRONMENT/GROUND FACILITIES',
+      'INTERFACE (HUMAN-MACHINE)',
+      'LEADERSHIP & SUPERVISION',
+      'HUMAN FACTORS',
+      'COMMUNICATIONS',
+      'OPERATIONS / MISSION',
+      'TASK PROFICIENCY AND CURRENCY',
+      'EQUIPMENT',
+      'REGULATIONS / RISK DECISIONS',
+      'ENVIRONMENT',
     ];
 
     return Stack(
@@ -415,11 +419,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
   // Score-range legend table
   Widget _buildScoreLegend() {
     const rows = [
-      ['1–4', 'Low Risk', 'Accept risk, monitor as needed'],
-      ['5–9', 'Moderate Risk', 'Accept with controls, review periodically'],
-      ['10–14', 'High Risk', 'Require mitigation, supervisor approval.'],
-      ['15–20', 'Very High Risk', 'Require immediate action, command approval'],
-      ['21–25', 'Extreme Risk', 'Mission abort/postpone, redesign required'],
+      ['1-4', 'Low Risk', 'Accept risk, monitor as needed'],
+      ['5-9', 'Moderate Risk', 'Accept with controls, review periodically'],
+      ['10-14', 'High Risk', 'Require mitigation, supervisor approval.'],
+      ['15-20', 'Very High Risk', 'Require immediate action, command approval'],
+      ['21-25', 'Extreme Risk', 'Mission abort/postpone, redesign required'],
     ];
     final badgeBg = {
       'Low Risk': const Color(0xFF2D5016),
