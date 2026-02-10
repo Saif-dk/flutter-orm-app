@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart';
 
 import '../models/mission_details.dart';
 import '../models/risk_entry.dart';
@@ -39,17 +41,92 @@ String _riskLabel(double score) {
 }
 
 class ExportService {
+  // Platform channel for Android MediaStore
+  static const platform = MethodChannel('com.yourapp.export/mediastore');
+
   // ─────────────────────────────────────────────────────────────────────────
-  // Excel (simple CSV fallback – unchanged)
+  // Save file to appropriate location based on platform
   // ─────────────────────────────────────────────────────────────────────────
-  static Future<void> exportExcel({
+  static Future<String?> _saveFile({
+    required String fileName,
+    required Uint8List fileBytes,
+    required String mimeType,
+  }) async {
+    if (Platform.isAndroid) {
+      // Use MediaStore API for Android (the CORRECT way for Android 10+)
+      try {
+        final result = await platform.invokeMethod('saveToDownloads', {
+          'fileName': fileName,
+          'fileBytes': fileBytes,
+          'mimeType': mimeType,
+        });
+        return result as String?;
+      } catch (e) {
+        print('Error saving to MediaStore: $e');
+        return null;
+      }
+    } else if (Platform.isIOS) {
+      // For iOS, save to Documents directory (accessible via Files app)
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsBytes(fileBytes);
+      return file.path;
+    } else if (Platform.isWindows) {
+      // Windows - use Downloads folder
+      final userProfile = Platform.environment['USERPROFILE'];
+      if (userProfile != null) {
+        final downloadsDir = Directory('$userProfile\\Downloads');
+        if (!await downloadsDir.exists()) {
+          await downloadsDir.create(recursive: true);
+        }
+        final file = File('${downloadsDir.path}\\$fileName');
+        await file.writeAsBytes(fileBytes);
+        return file.path;
+      }
+      // Fallback
+      final dir = await getDownloadsDirectory();
+      if (dir != null) {
+        final file = File('${dir.path}\\$fileName');
+        await file.writeAsBytes(fileBytes);
+        return file.path;
+      }
+    } else if (Platform.isMacOS) {
+      // macOS - use Downloads directory
+      final dir = await getDownloadsDirectory();
+      if (dir != null) {
+        final file = File('${dir.path}/$fileName');
+        await file.writeAsBytes(fileBytes);
+        return file.path;
+      }
+    } else if (Platform.isLinux) {
+      // Linux - use Downloads directory
+      final home = Platform.environment['HOME'];
+      if (home != null) {
+        final downloadsDir = Directory('$home/Downloads');
+        if (!await downloadsDir.exists()) {
+          await downloadsDir.create(recursive: true);
+        }
+        final file = File('${downloadsDir.path}/$fileName');
+        await file.writeAsBytes(fileBytes);
+        return file.path;
+      }
+    }
+
+    // Ultimate fallback - app documents directory
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/$fileName');
+    await file.writeAsBytes(fileBytes);
+    return file.path;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Excel (CSV format)
+  // ─────────────────────────────────────────────────────────────────────────
+  static Future<String?> exportExcel({
     required MissionDetails mission,
     required Map<String, List<dynamic>> rowsByCategory,
     required double? ormScore,
   }) async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/orm_assessment.xlsx');
-
     final buffer = StringBuffer()
       ..writeln('ORM Risk Assessment')
       ..writeln('Pilot,${mission.pilotName}')
@@ -76,19 +153,22 @@ class ExportService {
       }
     });
 
-    await file.writeAsString(buffer.toString());
+    final fileBytes = Uint8List.fromList(utf8.encode(buffer.toString()));
+    return await _saveFile(
+      fileName: 'orm_assessment_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+      fileBytes: fileBytes,
+      mimeType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // CSV – unchanged
+  // CSV
   // ─────────────────────────────────────────────────────────────────────────
-  static Future<void> exportCsv({
+  static Future<String?> exportCsv({
     required MissionDetails mission,
     required Map<String, List<dynamic>> rowsByCategory,
   }) async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/orm_assessment.csv');
-
     final rows = <String>[
       'Category,Title,Description,Likelihood,Severity,Deduction,Risk,Final'
     ];
@@ -108,13 +188,18 @@ class ExportService {
       }
     });
 
-    await file.writeAsString(rows.join('\n'));
+    final fileBytes = Uint8List.fromList(utf8.encode(rows.join('\n')));
+    return await _saveFile(
+      fileName: 'orm_assessment_${DateTime.now().millisecondsSinceEpoch}.csv',
+      fileBytes: fileBytes,
+      mimeType: 'text/csv',
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
   // PDF  – real PDF with military design
   // ─────────────────────────────────────────────────────────────────────────
-  static Future<void> exportPdf({
+  static Future<String?> exportPdf({
     required MissionDetails mission,
     required Map<String, List<dynamic>> rowsByCategory,
     required double? ormScore,
@@ -292,10 +377,13 @@ class ExportService {
       ),
     );
 
-    // ── write to disk ───────────────────────────────────────────────────
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/orm_assessment.pdf');
-    await file.writeAsBytes(await pdf.save());
+    // ── save to Downloads ───────────────────────────────────────────────
+    final pdfBytes = await pdf.save();
+    return await _saveFile(
+      fileName: 'orm_assessment_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      fileBytes: pdfBytes,
+      mimeType: 'application/pdf',
+    );
   }
 
   // ─── Page Header ──────────────────────────────────────────────────────────

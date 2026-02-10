@@ -175,10 +175,27 @@ class _AssessmentTabState extends State<AssessmentTab> {
       _rows[cat] = [];
       _showExampleDropdown[cat] = false;
     }
-    _loadData();
+    _clearDataAndLoad();
   }
 
   // ─── data loading ───────────────────────────────────────────────────────
+  Future<void> _clearDataAndLoad() async {
+    // Clear all stored data to start with empty form
+    await _dataService.saveRiskEntries([]);
+    await _dataService.saveMissionDetails(MissionDetails(
+      pilotName: '',
+      pilotCode: '',
+      secondPilotName: '',
+      secondPilotCode: '',
+      mechanicName: '',
+      missionType: '',
+      missionTime: '',
+    ));
+
+    // Now load the cleared data
+    _loadData();
+  }
+
   Future<void> _loadData() async {
     _mission = await _dataService.getMissionDetails();
     _hazardExamples = await _dataService.getCustomHazardExamples();
