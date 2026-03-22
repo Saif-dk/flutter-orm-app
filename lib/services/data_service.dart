@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:orm_risk_assessment/models/assessment_history.dart';
 import 'package:orm_risk_assessment/models/risk_entry.dart';
 import 'package:orm_risk_assessment/models/mission_details.dart';
 
 class DataService {
   static const String _missionDetailsKey = 'missionDetails';
   static const String _riskEntriesKey = 'riskEntries';
+  static const String _historyKey = 'assessmentHistory';
   static const String _customHazardExamplesKey = 'customHazardExamples';
 
   Future<SharedPreferences> _getPrefs() async {
@@ -54,6 +56,32 @@ class DataService {
     final prefs = await _getPrefs();
     final json = jsonEncode(entries.map((entry) => entry.toJson()).toList());
     await prefs.setString(_riskEntriesKey, json);
+  }
+
+  Future<List<AssessmentHistory>> getAssessmentHistory() async {
+    final prefs = await _getPrefs();
+    final json = prefs.getString(_historyKey);
+
+    if (json != null) {
+      final List<dynamic> list = jsonDecode(json);
+      return list.map((item) => AssessmentHistory.fromJson(item)).toList()
+        // sort newest first
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+
+    return [];
+  }
+
+  Future<void> saveAssessmentHistory(List<AssessmentHistory> history) async {
+    final prefs = await _getPrefs();
+    final json = jsonEncode(history.map((h) => h.toJson()).toList());
+    await prefs.setString(_historyKey, json);
+  }
+
+  Future<void> addToAssessmentHistory(AssessmentHistory item) async {
+    final history = await getAssessmentHistory();
+    history.insert(0, item);
+    await saveAssessmentHistory(history);
   }
 
   Future<Map<String, dynamic>> getCustomHazardExamples() async {

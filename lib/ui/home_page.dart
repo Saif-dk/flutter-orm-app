@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:orm_risk_assessment/ui/assessment_tab.dart';
+import 'package:orm_risk_assessment/ui/history_tab.dart';
 import 'package:orm_risk_assessment/ui/reference_tab.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,6 +15,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _tabs = const [
     AssessmentTab(),
+    HistoryTab(),
     ReferenceTab(),
   ];
 
@@ -70,6 +72,10 @@ class _HomePageState extends State<HomePage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.security),
               label: 'Risk Assessment',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history),
+              label: 'History',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.table_chart),

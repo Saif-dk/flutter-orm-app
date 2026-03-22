@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:orm_risk_assessment/models/assessment_history.dart';
 import 'package:orm_risk_assessment/models/risk_entry.dart';
 import 'package:orm_risk_assessment/models/mission_details.dart';
 import 'package:orm_risk_assessment/services/data_service.dart';
@@ -25,16 +26,16 @@ const List<Map<String, dynamic>> SEVERITY_OPTIONS = [
 ];
 
 const List<String> CATEGORIES = [
-  'Planning',
-  'Interface (Human-Machine)',
-  'Leadership & Supervision',
   'Human Factors',
+  'ENVIRONMENT',
+  'Leadership & Supervision',
+  'Interface (Human-Machine)',
   'Communications',
   'Operations / Mission',
+  'Planning',
   'Task Proficiency and Currency',
   'Equipment',
   'Regulations / Risk Decisions',
-  'ENVIRONMENT',
 ];
 
 // ---------------------------------------------------------------------------
@@ -356,6 +357,32 @@ class _AssessmentTabState extends State<AssessmentTab> {
     } catch (e) {
       _snackbar('PDF export failed: $e', Colors.red);
     }
+  }
+
+  Future<void> _saveToHistory() async {
+    if (!_validate()) {
+      _snackbar('Please complete required fields before saving', Colors.red);
+      return;
+    }
+
+    await _save();
+    await _saveMission();
+
+    final entries = <RiskEntry>[];
+    for (final cat in CATEGORIES) {
+      entries.addAll(_rows[cat]!.map((r) => r.toRiskEntry()));
+    }
+
+    final item = AssessmentHistory(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      createdAt: DateTime.now(),
+      mission: _mission,
+      entries: entries,
+    );
+
+    await _dataService.addToAssessmentHistory(item);
+
+    _snackbar('Saved to history', Colors.green);
   }
 
   void _snackbar(String msg, Color bg) {
@@ -1107,6 +1134,19 @@ class _AssessmentTabState extends State<AssessmentTab> {
                   bg: const Color(0xFF8B5A00),
                   txtColor: const Color(0xFFFFE8C8),
                   onPressed: _exportToPDF,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _exportButton(
+                  label: '📌 Save to History',
+                  bg: const Color(0xFF4A6741),
+                  txtColor: const Color(0xFFD4E8C8),
+                  onPressed: _saveToHistory,
                 ),
               ),
             ],
