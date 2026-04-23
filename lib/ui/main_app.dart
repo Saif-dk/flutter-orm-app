@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:orm_risk_assessment/ui/home_page.dart';
+import 'package:orm_risk_assessment/ui/launch_page.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -79,7 +80,11 @@ class MainApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomePage(),
+      home: const LaunchPage(),
+      routes: {
+        '/launch': (context) => const LaunchPage(),
+        '/home': (context) => const HomePage(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }

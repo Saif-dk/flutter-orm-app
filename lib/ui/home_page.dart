@@ -29,12 +29,35 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color(0xFF4A6741),
         centerTitle: true,
         elevation: 0,
-        // LEFT image
+        // LEFT image with Go Launch button
         leading: Padding(
           padding: const EdgeInsets.all(8.0), // optional padding
-          child: Image.asset(
-            'assets/images/left.png',
-            fit: BoxFit.contain,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushReplacementNamed('/launch');
+            },
+            child: Row(
+              children: [
+                Image.asset(
+                  'assets/images/left.png',
+                  fit: BoxFit.contain,
+                  width: 86,
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFF5A7751)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Icon(
+                    Icons.rocket_launch,
+                    color: Color(0xFFD4E8C8),
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         // RIGHT image

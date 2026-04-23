@@ -24,6 +24,7 @@ dependencies:
   flutter_svg: ^2.0.7
   get: ^4.6.6
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -35,6 +36,8 @@ flutter:
   assets:
     - assets/images/left.png
     - assets/images/right.png
+    - assets/GIF/helicopter.gif
+    - assets/sounds/helicopter.mp3
 
 flutter_launcher_icons:
   android: true
