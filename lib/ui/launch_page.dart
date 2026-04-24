@@ -35,29 +35,18 @@ const List<String> _letters = [
   'R'
 ];
 const List<String> _acronyms = [
-  'Hazards',
-  'Exposure',
-  'Likelihood',
-  'Impact',
-  'Controls',
-  'Oversight',
-  'Probability',
-  'Threats',
-  'Evaluation',
-  'Risk Level',
+  'Human Factor',
+  'Environment',
+  'Leadership & Supervision',
+  'Interface',
+  'Communication',
+  'Operation/Mission',
+  'Planning',
+  'Task Proficiency/Currency',
+  'Equipment',
+  'Risk Decision/Regulation',
 ];
-const List<String> _descriptions = [
-  'Identify all potential hazards in the operational environment',
-  'Determine the level of personnel and asset exposure',
-  'Estimate the likelihood of a hazard event occurring',
-  'Assess the severity of potential impact',
-  'Apply and evaluate existing control measures',
-  'Review oversight mechanisms and command visibility',
-  'Calculate overall mission probability of success',
-  'Identify threats that may affect mission execution',
-  'Evaluate residual risk after applying controls',
-  'Determine the final composite risk level',
-];
+
 
 // ─── LaunchPage ───────────────────────────────────────────────────────────────
 class LaunchPage extends StatefulWidget {
@@ -94,9 +83,9 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
   Timer? _cursorTimer;
 
   // helicopter image size and button metrics
-  final double _helicopterHeight = 320.0;
-  final double _buttonHeight = 60.0;
-  final double _buttonBottomPadding = -35.0;
+  final double _helicopterHeight = 250.0;
+  final double _buttonHeight = 40.0;
+  final double _buttonBottomPadding = 70.0;
   // audio bridge (web or no-op)
 
   @override
@@ -607,12 +596,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                       letterSpacing: 2.5,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _descriptions[_selected],
-                    style: const TextStyle(
-                        color: _cTextSub, fontSize: 12, height: 1.5),
-                  ),
+
                 ],
               ),
             ),
