@@ -3,6 +3,11 @@
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
+// method channel for native audio
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
+#include <flutter/encodable_value.h>
+#include <mmsystem.h>
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -30,6 +35,42 @@ bool FlutterWindow::OnCreate() {
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
+
+  // Register a simple method channel to play/stop launch audio.
+  // The channel persists in a static unique_ptr so the handler remains alive.
+  static std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> audio_channel;
+  audio_channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(),
+      "orm_risk_assessment/launch_audio",
+      &flutter::StandardMethodCodec::GetInstance());
+
+  audio_channel->SetMethodCallHandler(
+      [this](const flutter::MethodCall<flutter::EncodableValue>& call,
+             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        const std::string method = call.method_name();
+        if (method == "play") {
+          // Determine path to the packaged flutter assets.
+          wchar_t module_path[MAX_PATH];
+          ::GetModuleFileNameW(NULL, module_path, MAX_PATH);
+          std::wstring path_w(module_path);
+          size_t pos = path_w.find_last_of(L"\\/");
+          std::wstring dir = (pos == std::wstring::npos) ? path_w : path_w.substr(0, pos);
+          // Flutter assets are packaged under <exe-dir>\data\flutter_assets\assets\...
+          std::wstring asset_path = dir + L"\\data\\flutter_assets\\assets\\sounds\\helicopter.mp3";
+
+          // Use MCI to open and play the file.
+          std::wstring open_cmd = L"open \"" + asset_path + L"\" type mpegvideo alias helicopteraudio";
+          mciSendStringW(open_cmd.c_str(), NULL, 0, NULL);
+          mciSendStringW(L"play helicopteraudio", NULL, 0, NULL);
+          result->Success();
+        } else if (method == "dispose") {
+          mciSendStringW(L"stop helicopteraudio", NULL, 0, NULL);
+          mciSendStringW(L"close helicopteraudio", NULL, 0, NULL);
+          result->Success();
+        } else {
+          result->NotImplemented();
+        }
+      });
 
   // Flutter can complete the first frame before the "show window" callback is
   // registered. The following call ensures a frame is pending to ensure the

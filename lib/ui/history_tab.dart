@@ -49,7 +49,7 @@ class _HistoryTabState extends State<HistoryTab> {
             SizedBox(height: 10),
             Text(
               'No history yet',
-              style: TextStyle(color: Color(0xFFB8D4A8), fontSize: 16),
+              style: TextStyle(color: Color(0xFFB8D4A8), fontSize: 23),
             ),
             SizedBox(height: 6),
             Text(
@@ -133,7 +133,7 @@ class _HistoryTile extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               formattedDate,
-              style: const TextStyle(color: Color(0xFF888888), fontSize: 12),
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 21),
             ),
           ],
         ),

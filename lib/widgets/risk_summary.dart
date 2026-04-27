@@ -31,12 +31,12 @@ class RiskSummary extends StatelessWidget {
             'Risk Assessment Summary',
             style: TextStyle(
               color: Color(0xFFD4E8C8),
-              fontSize: 18,
+              fontSize: 25,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // ORM Risk Badge
           Row(
             children: [
@@ -53,7 +53,7 @@ class RiskSummary extends StatelessWidget {
                     style: TextStyle(
                       color: _getRiskTextColor(riskCategory),
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 23,
                     ),
                   ),
                 ),
@@ -72,16 +72,16 @@ class RiskSummary extends StatelessWidget {
                     style: TextStyle(
                       color: _getRiskTextColor(riskCategory),
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 23,
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Assessment Date
           Row(
             children: [

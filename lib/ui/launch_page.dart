@@ -46,7 +46,18 @@ const List<String> _acronyms = [
   'Equipment',
   'Risk Decision/Regulation',
 ];
-
+const List<String> _descriptions = [
+  'Assess crew fitness, fatigue, health, and experience level that may affect mission performance.',
+  'Evaluate weather, terrain, lighting conditions, and environmental hazards impacting the operation.',
+  'Review quality of leadership, crew coordination, supervision, and chain-of-command effectiveness.',
+  'Identify human-machine interface issues, cockpit ergonomics, and system usability concerns.',
+  'Examine clarity of crew briefs, ATC coordination, and inter-crew communication standards.',
+  'Analyse mission complexity, operational tempo, and alignment with unit capabilities.',
+  'Review mission planning thoroughness, contingency preparation, and route/fuel analysis.',
+  'Assess individual crew task proficiency, currency, and recency of relevant training.',
+  'Inspect aircraft airworthiness, equipment serviceability, and availability of required gear.',
+  'Evaluate risk acceptance authority, regulatory compliance, and go/no-go decision criteria.',
+];
 
 // ─── LaunchPage ───────────────────────────────────────────────────────────────
 class LaunchPage extends StatefulWidget {
@@ -75,8 +86,8 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
   late Animation<double> _launchProgress;
   bool _launched = false;
 
-  // selected letter
-  int _selected = 0;
+  // selected letter (null = nothing selected)
+  int? _selected;
 
   // blink timer for cursor
   bool _cursorVisible = true;
@@ -324,13 +335,13 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                 Text('OPERATIONAL RISK',
                     style: TextStyle(
                         color: _cTextPrimary,
-                        fontSize: 11,
+                        fontSize: 16,
                         letterSpacing: 1.8,
                         fontWeight: FontWeight.w700)),
                 Text('MANAGEMENT SYSTEM',
                     style: TextStyle(
                         color: Color.fromARGB(255, 102, 204, 145),
-                        fontSize: 10,
+                        fontSize: 15,
                         letterSpacing: 1.5)),
               ],
             ),
@@ -340,7 +351,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
           const SizedBox(width: 6),
           const Text('SYS ONLINE',
               style: TextStyle(
-                  color: Color(0xFF60DD80), fontSize: 10, letterSpacing: 1.4)),
+                  color: Color(0xFF60DD80), fontSize: 15, letterSpacing: 1.4)),
           const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -351,7 +362,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
             child: const Text('31 UA',
                 style: TextStyle(
                     color: Color.fromARGB(255, 102, 204, 146),
-                    fontSize: 11,
+                    fontSize: 16,
                     letterSpacing: 1.5)),
           ),
         ],
@@ -374,7 +385,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
             ),
           ),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: 19),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +400,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
         ),
         // Vertical divider with ticks
         Container(
-          width: 24,
+          width: 29,
           height: 72,
           child: CustomPaint(painter: _TickPainter()),
         ),
@@ -411,7 +422,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
             duration: const Duration(milliseconds: 180),
             style: TextStyle(
               fontFamily: 'monospace',
-              fontSize: 32,
+              fontSize: 37,
               fontWeight: FontWeight.w900,
               letterSpacing: 2,
               color: lit
@@ -445,7 +456,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
             'RISK ASSESSMENT MODEL',
             style: TextStyle(
                 color: Color.fromARGB(255, 102, 204, 150),
-                fontSize: 11,
+                fontSize: 16,
                 letterSpacing: 3),
           ),
           const SizedBox(width: 4),
@@ -505,7 +516,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                 Text(
                   _letters[i],
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 23,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1,
                     color: isSelected
@@ -526,7 +537,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                 Text(
                   '${i + 1}'.padLeft(2, '0'),
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 13,
                     color: isSelected
                         ? const Color.fromARGB(255, 61, 232, 127)
                         : const Color.fromARGB(255, 26, 80, 54),
@@ -545,64 +556,104 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
   Widget _buildInfoCard() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
-      child: Container(
-        key: ValueKey(_selected),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 14, 40, 19),
-          border: Border(
-            left: BorderSide(
-                color: const Color.fromARGB(255, 79, 255, 161), width: 3),
-            top: BorderSide(color: const Color.fromARGB(255, 30, 107, 52)),
-            right: BorderSide(color: const Color.fromARGB(255, 30, 107, 75)),
-            bottom: BorderSide(color: const Color.fromARGB(255, 30, 107, 67)),
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Big letter badge
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
+      child: _selected == null
+          ? Container(
+              key: const ValueKey('empty'),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color:
-                    const Color.fromARGB(255, 61, 232, 144).withOpacity(0.12),
-                border: Border.all(
-                    color: const Color.fromARGB(255, 79, 255, 167)
-                        .withOpacity(0.5)),
-              ),
-              child: Text(
-                _letters[_selected],
-                style: const TextStyle(
-                  color: Color.fromARGB(255, 79, 255, 155),
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
+                color: const Color.fromARGB(255, 14, 40, 19),
+                border: Border(
+                  left: BorderSide(
+                      color: const Color.fromARGB(255, 30, 107, 80), width: 3),
+                  top:
+                      BorderSide(color: const Color.fromARGB(255, 30, 107, 52)),
+                  right:
+                      BorderSide(color: const Color.fromARGB(255, 30, 107, 75)),
+                  bottom:
+                      BorderSide(color: const Color.fromARGB(255, 30, 107, 67)),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
+              child: const Center(
+                child: Text(
+                  'SELECT A LETTER TO VIEW DETAILS',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 45, 120, 70),
+                    fontSize: 16,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
+            )
+          : Container(
+              key: ValueKey(_selected),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 14, 40, 19),
+                border: Border(
+                  left: BorderSide(
+                      color: const Color.fromARGB(255, 79, 255, 161), width: 3),
+                  top:
+                      BorderSide(color: const Color.fromARGB(255, 30, 107, 52)),
+                  right:
+                      BorderSide(color: const Color.fromARGB(255, 30, 107, 75)),
+                  bottom:
+                      BorderSide(color: const Color.fromARGB(255, 30, 107, 67)),
+                ),
+              ),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _acronyms[_selected].toUpperCase(),
-                    style: const TextStyle(
-                      color: _cLetterGlow,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
-                      letterSpacing: 2.5,
+                  // Big letter badge
+                  Container(
+                    width: 44,
+                    height: 44,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 61, 232, 144)
+                          .withOpacity(0.12),
+                      border: Border.all(
+                          color: const Color.fromARGB(255, 79, 255, 167)
+                              .withOpacity(0.5)),
+                    ),
+                    child: Text(
+                      _letters[_selected!],
+                      style: const TextStyle(
+                        color: Color.fromARGB(255, 79, 255, 155),
+                        fontSize: 27,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _acronyms[_selected!].toUpperCase(),
+                          style: const TextStyle(
+                            color: _cLetterGlow,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                            letterSpacing: 2.5,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _descriptions[_selected!],
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 130, 200, 160),
+                            fontSize: 16,
+                            height: 1.5,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -620,7 +671,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
           const SizedBox(width: 10),
           const Text('CREW READY',
               style:
-                  TextStyle(color: _cTextSub, fontSize: 10, letterSpacing: 2)),
+                  TextStyle(color: _cTextSub, fontSize: 15, letterSpacing: 2)),
           const Spacer(),
           _BlinkingText('◉ SYSTEM NOMINAL', color: const Color(0xFF60DD80)),
           const SizedBox(width: 10),
@@ -661,7 +712,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                   style: const TextStyle(
                     color: _cGreenFg,
                     fontWeight: FontWeight.w900,
-                    fontSize: 14,
+                    fontSize: 19,
                     letterSpacing: 3,
                   ),
                 ),
@@ -683,20 +734,20 @@ class _HUDRow extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 58,
+          width: 73,
           child: Text(label,
               style: const TextStyle(
                   color: Color.fromARGB(255, 5, 253, 141),
-                  fontSize: 10,
+                  fontSize: 15,
                   letterSpacing: 1.6)),
         ),
         const Text('▸ ',
             style: TextStyle(
-                color: Color.fromARGB(255, 36, 238, 144), fontSize: 10)),
+                color: Color.fromARGB(255, 36, 238, 144), fontSize: 15)),
         Text(value,
             style: const TextStyle(
                 color: _cTextPrimary,
-                fontSize: 10,
+                fontSize: 15,
                 letterSpacing: 1.4,
                 fontWeight: FontWeight.w700)),
       ],
@@ -783,7 +834,7 @@ class _BlinkingTextState extends State<_BlinkingText>
         opacity: 0.5 + _c.value * 0.5,
         child: Text(widget.text,
             style: TextStyle(
-                color: widget.color, fontSize: 10, letterSpacing: 1.8)),
+                color: widget.color, fontSize: 15, letterSpacing: 1.8)),
       ),
     );
   }

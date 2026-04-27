@@ -1,16 +1,16 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 
-final AudioPlayer _player = AudioPlayer();
+const MethodChannel _channel = MethodChannel('orm_risk_assessment/launch_audio');
 
 Future<void> playLaunchAudio() async {
   try {
-    await _player.play(AssetSource('sounds/helicopter.mp3'));
+    await _channel.invokeMethod('play');
   } catch (_) {}
 }
 
 Future<void> disposeLaunchAudio() async {
   try {
-    await _player.stop();
-    await _player.dispose();
+    await _channel.invokeMethod('dispose');
   } catch (_) {}
 }

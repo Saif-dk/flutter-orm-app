@@ -6,8 +6,20 @@ import 'package:orm_risk_assessment/models/mission_details.dart';
 import 'package:orm_risk_assessment/services/data_service.dart';
 import 'package:orm_risk_assessment/services/export_service.dart';
 
+// ─── colour tokens (mirrors launch_page) ─────────────────────────────────────
+const _cBackground = Color(0xFF090C1A);
+const _cSurface = Color.fromARGB(255, 14, 40, 28);
+const _cBorder = Color.fromARGB(255, 30, 107, 57);
+const _cBorderBright = Color.fromARGB(255, 45, 201, 89);
+const _cAccent = Color.fromARGB(255, 61, 232, 121);
+const _cTextPrimary = Color(0xFFDDE3FF);
+const _cTextSub = Color(0xFF6677CC);
+const _cLetterLit = Color.fromARGB(255, 79, 255, 146);
+const _cLetterGlow = Color.fromARGB(255, 170, 255, 194);
+const _cGreenFg = Color(0xFFBBE0B0);
+
 // ---------------------------------------------------------------------------
-// Constants – mirror the HTML exactly
+// Constants
 // ---------------------------------------------------------------------------
 const List<Map<String, dynamic>> LIKELIHOOD_OPTIONS = [
   {'v': 1, 'label': 'Very improbable'},
@@ -53,27 +65,25 @@ String riskCategoryFrom(double score) {
 Color colorFromCategory(String category) {
   switch (category) {
     case 'Low risk':
-      return const Color(0xFF4CAF50); // green
+      return const Color(0xFF4CAF50);
     case 'Moderate risk':
-      return const Color(0xFFFFC107); // yellow
+      return const Color(0xFFFFC107);
     case 'High risk':
-      return const Color(0xFFFF9800); // orange
+      return const Color(0xFFFF9800);
     case 'Very high risk':
-      return const Color(0xFFF44336); // red
+      return const Color(0xFFF44336);
     case 'Extreme risk':
-      return const Color(0xFF323232); // near-black
+      return const Color(0xFF323232);
     default:
       return Colors.white;
   }
 }
 
-Color textColorForCategory(String category) {
-  return (category == 'Extreme risk' || category == 'Very high risk')
-      ? Colors.white
-      : Colors.black;
-}
+Color textColorForCategory(String category) =>
+    (category == 'Extreme risk' || category == 'Very high risk')
+        ? Colors.white
+        : Colors.black;
 
-/// Map assessment category names → the keys used in DataService storage
 String mapCategoryToStorageKey(String cat) {
   const map = {
     'Planning': 'PLANNING',
@@ -91,7 +101,7 @@ String mapCategoryToStorageKey(String cat) {
 }
 
 // ---------------------------------------------------------------------------
-// Per-row in-memory model (not persisted individually – the whole list is)
+// Per-row in-memory model
 // ---------------------------------------------------------------------------
 class _RiskRow {
   String id;
@@ -101,8 +111,6 @@ class _RiskRow {
   int severity;
   String description;
   double deduction;
-
-  // choices list – if non-empty the description field becomes a dropdown
   List<String> choices;
 
   _RiskRow({
@@ -147,26 +155,17 @@ class _RiskRow {
 // ---------------------------------------------------------------------------
 class AssessmentTab extends StatefulWidget {
   const AssessmentTab({super.key});
-
   @override
   State<AssessmentTab> createState() => _AssessmentTabState();
 }
 
 class _AssessmentTabState extends State<AssessmentTab> {
-  // ─── data ───────────────────────────────────────────────────────────────
   final DataService _dataService = DataService();
   late MissionDetails _mission;
-  // rows grouped by category  { "Planning": [row, …], … }
   final Map<String, List<_RiskRow>> _rows = {};
-  // example lists per category { "Planning": [ {name, choices}, … ], … }
   Map<String, dynamic> _hazardExamples = {};
-  // "Use Example" dropdown visibility per category
   final Map<String, bool> _showExampleDropdown = {};
-
-  // ─── validation ─────────────────────────────────────────────────────────
   List<String> _missingFields = [];
-
-  // ─── loading ────────────────────────────────────────────────────────────
   bool _loading = true;
 
   @override
@@ -179,9 +178,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
     _clearDataAndLoad();
   }
 
-  // ─── data loading ───────────────────────────────────────────────────────
   Future<void> _clearDataAndLoad() async {
-    // Clear all stored data to start with empty form
     await _dataService.saveRiskEntries([]);
     await _dataService.saveMissionDetails(MissionDetails(
       pilotName: '',
@@ -192,15 +189,12 @@ class _AssessmentTabState extends State<AssessmentTab> {
       missionType: '',
       missionTime: '',
     ));
-
-    // Now load the cleared data
     _loadData();
   }
 
   Future<void> _loadData() async {
     _mission = await _dataService.getMissionDetails();
     _hazardExamples = await _dataService.getCustomHazardExamples();
-
     final entries = await _dataService.getRiskEntries();
     for (final cat in CATEGORIES) {
       _rows[cat] = [];
@@ -209,13 +203,11 @@ class _AssessmentTabState extends State<AssessmentTab> {
       final cat = _rows.containsKey(e.category) ? e.category : CATEGORIES.first;
       _rows[cat]!.add(_RiskRow.fromRiskEntry(e));
     }
-
     setState(() {
       _loading = false;
     });
   }
 
-  // ─── persist ────────────────────────────────────────────────────────────
   Future<void> _save() async {
     final all = <RiskEntry>[];
     for (final cat in CATEGORIES) {
@@ -224,11 +216,9 @@ class _AssessmentTabState extends State<AssessmentTab> {
     await _dataService.saveRiskEntries(all);
   }
 
-  Future<void> _saveMission() async {
-    await _dataService.saveMissionDetails(_mission);
-  }
+  Future<void> _saveMission() async =>
+      await _dataService.saveMissionDetails(_mission);
 
-  // ─── ORM summary (max of all finalRiskValue) ───────────────────────────
   double? get _ormScore {
     double? max;
     for (final cat in CATEGORIES) {
@@ -240,25 +230,22 @@ class _AssessmentTabState extends State<AssessmentTab> {
     return max;
   }
 
-  // ─── examples helpers ───────────────────────────────────────────────────
   List<Map<String, dynamic>> _examplesFor(String cat) {
     final key = mapCategoryToStorageKey(cat);
     final raw = _hazardExamples[key];
     if (raw is List) {
       return raw.map((item) {
-        if (item is Map) {
+        if (item is Map)
           return {
             'name': item['name'] ?? '',
-            'choices': item['choices'] is List ? item['choices'] : [],
+            'choices': item['choices'] is List ? item['choices'] : []
           };
-        }
         return {'name': item.toString(), 'choices': []};
       }).toList();
     }
     return [];
   }
 
-  // ─── add / remove ───────────────────────────────────────────────────────
   void _addRisk(String cat,
       {String title = '', List<String> choices = const []}) {
     final row = _RiskRow(
@@ -275,25 +262,21 @@ class _AssessmentTabState extends State<AssessmentTab> {
   }
 
   void _removeRisk(String cat, String id) {
-    // Dispose controllers for this row before removing
     _riskTitleControllers.remove(id)?.dispose();
     _riskDescControllers.remove(id)?.dispose();
     _riskDedControllers.remove(id)?.dispose();
-
     setState(() {
       _rows[cat]!.removeWhere((r) => r.id == id);
     });
     _save();
   }
 
-  // ─── validation ─────────────────────────────────────────────────────────
   bool _validate() {
     final missing = <String>[];
     if (_mission.pilotName.trim().isEmpty) missing.add('Pilot Name');
     if (_mission.pilotCode.trim().isEmpty) missing.add('Pilot Code');
     if (_mission.missionTime.trim().isEmpty) missing.add('Mission Date');
     if (_mission.missionType.trim().isEmpty) missing.add('Mission Type');
-
     setState(() {
       _missingFields = missing;
     });
@@ -302,22 +285,16 @@ class _AssessmentTabState extends State<AssessmentTab> {
 
   bool _isFieldMissing(String label) => _missingFields.contains(label);
 
-  // ─── exports ────────────────────────────────────────────────────────────
   Future<void> _exportToExcel() async {
     if (!_validate()) {
       _snackbar('Please complete required fields before exporting', Colors.red);
       return;
     }
-
     await _save();
     await _saveMission();
-
     try {
       await ExportService.exportExcel(
-        mission: _mission,
-        rowsByCategory: _rows,
-        ormScore: _ormScore,
-      );
+          mission: _mission, rowsByCategory: _rows, ormScore: _ormScore);
       _snackbar('Excel file saved successfully', Colors.green);
     } catch (e) {
       _snackbar('Excel export failed: $e', Colors.red);
@@ -326,12 +303,8 @@ class _AssessmentTabState extends State<AssessmentTab> {
 
   Future<void> _exportToCSV() async {
     await _save();
-
     try {
-      await ExportService.exportCsv(
-        mission: _mission,
-        rowsByCategory: _rows,
-      );
+      await ExportService.exportCsv(mission: _mission, rowsByCategory: _rows);
       _snackbar('CSV file saved successfully', Colors.green);
     } catch (e) {
       _snackbar('CSV export failed: $e', Colors.red);
@@ -343,16 +316,11 @@ class _AssessmentTabState extends State<AssessmentTab> {
       _snackbar('Please complete required fields before exporting', Colors.red);
       return;
     }
-
     await _save();
     await _saveMission();
-
     try {
       await ExportService.exportPdf(
-        mission: _mission,
-        rowsByCategory: _rows,
-        ormScore: _ormScore,
-      );
+          mission: _mission, rowsByCategory: _rows, ormScore: _ormScore);
       _snackbar('PDF file saved successfully', Colors.green);
     } catch (e) {
       _snackbar('PDF export failed: $e', Colors.red);
@@ -364,31 +332,31 @@ class _AssessmentTabState extends State<AssessmentTab> {
       _snackbar('Please complete required fields before saving', Colors.red);
       return;
     }
-
     await _save();
     await _saveMission();
-
     final entries = <RiskEntry>[];
     for (final cat in CATEGORIES) {
       entries.addAll(_rows[cat]!.map((r) => r.toRiskEntry()));
     }
-
     final item = AssessmentHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       createdAt: DateTime.now(),
       mission: _mission,
       entries: entries,
     );
-
     await _dataService.addToAssessmentHistory(item);
-
     _snackbar('Saved to history', Colors.green);
   }
 
   void _snackbar(String msg, Color bg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: bg),
+      SnackBar(
+        content: Text(msg, style: const TextStyle(letterSpacing: 1)),
+        backgroundColor: bg,
+        behavior: SnackBarBehavior.floating,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      ),
     );
   }
 
@@ -398,30 +366,31 @@ class _AssessmentTabState extends State<AssessmentTab> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return Container(
+        color: _cBackground,
+        child: const Center(
+          child: CircularProgressIndicator(color: _cLetterLit),
+        ),
+      );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── validation banner ──────────────────────────────────────────
-          if (_missingFields.isNotEmpty) _buildValidationBanner(),
-
-          // ── Mission & Crew Information ─────────────────────────────────
-          _buildMissionSection(),
-          const SizedBox(height: 16),
-
-          // ── one section per category ───────────────────────────────────
-          for (final cat in CATEGORIES) ...[
-            _buildCategorySection(cat),
+    return Container(
+      color: _cBackground,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_missingFields.isNotEmpty) _buildValidationBanner(),
+            _buildMissionSection(),
             const SizedBox(height: 16),
+            for (final cat in CATEGORIES) ...[
+              _buildCategorySection(cat),
+              const SizedBox(height: 16),
+            ],
+            _buildResultsSection(),
           ],
-
-          // ── ORM summary + export buttons ───────────────────────────────
-          _buildResultsSection(),
-        ],
+        ),
       ),
     );
   }
@@ -434,37 +403,51 @@ class _AssessmentTabState extends State<AssessmentTab> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF3B1010),
-        border: Border.all(color: const Color(0xFF8B1010)),
-        borderRadius: BorderRadius.circular(6),
+        color: const Color(0xFF1A0505),
+        border: Border(
+          left: const BorderSide(color: Color(0xFFFF4040), width: 3),
+          top: BorderSide(color: const Color(0xFF8B1010)),
+          right: BorderSide(color: const Color(0xFF8B1010)),
+          bottom: BorderSide(color: const Color(0xFF8B1010)),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(
             children: [
-              Icon(Icons.warning_amber, color: Color(0xFFFFB74D), size: 20),
+              Icon(Icons.warning_amber, color: Color(0xFFFFB74D), size: 18),
               SizedBox(width: 8),
               Text(
-                '⚠️  Form Incomplete!',
+                'FORM INCOMPLETE',
                 style: TextStyle(
                   color: Color(0xFFFFB74D),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  letterSpacing: 2.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
+          const SizedBox(height: 6),
+          const Text(
             'Please fill in the following required fields:',
-            style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 13),
+            style:
+                TextStyle(color: _cTextSub, fontSize: 12, letterSpacing: 0.5),
           ),
           const SizedBox(height: 4),
           for (final f in _missingFields)
-            Text(
-              '• $f',
-              style: const TextStyle(color: Color(0xFFFFCDD2), fontSize: 13),
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Row(
+                children: [
+                  const Text('▸ ',
+                      style: TextStyle(color: Color(0xFFFF6060), fontSize: 10)),
+                  Text(f,
+                      style: const TextStyle(
+                          color: Color(0xFFFFCDD2), fontSize: 12)),
+                ],
+              ),
             ),
         ],
       ),
@@ -472,116 +455,261 @@ class _AssessmentTabState extends State<AssessmentTab> {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Mission & Crew Information section  (mirrors the HTML layout)
+  // Mission & Crew Information section
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildMissionSection() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1C3D2C), Color(0xFF0F2419)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: const Color(0xFF4A6741)),
-      ),
-      padding: const EdgeInsets.all(16),
+    return _sectionContainer(
+      title: 'MISSION & CREW INFORMATION',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Mission & Crew Information',
-            style: _sectionHeadingStyle(),
-          ),
-          const SizedBox(height: 14),
-
-          // Pilot Name  |  Pilot Code
           Row(
             children: [
               Expanded(
-                child: _missionTextField(
-                  key: 'pilotName',
-                  value: _mission.pilotName,
-                  placeholder: 'Pilot Name',
-                  required: true,
-                  missingLabel: 'Pilot Name',
-                  capitalize: true,
-                  onChanged: (v) => setState(
-                      () => _mission = _mission.copyWith(pilotName: v)),
-                ),
-              ),
+                  child: _missionTextField(
+                      key: 'pilotName',
+                      value: _mission.pilotName,
+                      placeholder: 'Pilot Name',
+                      required: true,
+                      missingLabel: 'Pilot Name',
+                      capitalize: true,
+                      onChanged: (v) => setState(
+                          () => _mission = _mission.copyWith(pilotName: v)))),
               const SizedBox(width: 10),
               Expanded(
-                child: _missionTextField(
-                  key: 'pilotCode',
-                  value: _mission.pilotCode,
-                  placeholder: 'Pilot Code',
-                  required: true,
-                  missingLabel: 'Pilot Code',
-                  uppercase: true,
-                  onChanged: (v) => setState(
-                      () => _mission = _mission.copyWith(pilotCode: v)),
-                ),
-              ),
+                  child: _missionTextField(
+                      key: 'pilotCode',
+                      value: _mission.pilotCode,
+                      placeholder: 'Pilot Code',
+                      required: true,
+                      missingLabel: 'Pilot Code',
+                      uppercase: true,
+                      onChanged: (v) => setState(
+                          () => _mission = _mission.copyWith(pilotCode: v)))),
             ],
           ),
           const SizedBox(height: 10),
-
-          // Second Pilot Name  |  Second Pilot Code
           Row(
             children: [
               Expanded(
-                child: _missionTextField(
-                  key: 'secondPilotName',
-                  value: _mission.secondPilotName,
-                  placeholder: 'Second Pilot Name',
-                  capitalize: true,
-                  onChanged: (v) => setState(
-                      () => _mission = _mission.copyWith(secondPilotName: v)),
-                ),
-              ),
+                  child: _missionTextField(
+                      key: 'secondPilotName',
+                      value: _mission.secondPilotName,
+                      placeholder: 'Second Pilot Name',
+                      capitalize: true,
+                      onChanged: (v) => setState(() =>
+                          _mission = _mission.copyWith(secondPilotName: v)))),
               const SizedBox(width: 10),
               Expanded(
-                child: _missionTextField(
-                  key: 'secondPilotCode',
-                  value: _mission.secondPilotCode,
-                  placeholder: 'Second Pilot Code',
-                  uppercase: true,
-                  onChanged: (v) => setState(
-                      () => _mission = _mission.copyWith(secondPilotCode: v)),
-                ),
-              ),
+                  child: _missionTextField(
+                      key: 'secondPilotCode',
+                      value: _mission.secondPilotCode,
+                      placeholder: 'Second Pilot Code',
+                      uppercase: true,
+                      onChanged: (v) => setState(() =>
+                          _mission = _mission.copyWith(secondPilotCode: v)))),
             ],
           ),
           const SizedBox(height: 10),
-
-          // Mechanic Name (full width)
           _missionTextField(
-            key: 'mechanicName',
-            value: _mission.mechanicName,
-            placeholder: 'Mechanic Name',
-            capitalize: true,
-            onChanged: (v) =>
-                setState(() => _mission = _mission.copyWith(mechanicName: v)),
-          ),
+              key: 'mechanicName',
+              value: _mission.mechanicName,
+              placeholder: 'Mechanic Name',
+              capitalize: true,
+              onChanged: (v) => setState(
+                  () => _mission = _mission.copyWith(mechanicName: v))),
           const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _missionDateField()),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _missionTextField(
+                      key: 'missionType',
+                      value: _mission.missionType,
+                      placeholder: 'Mission Type',
+                      required: true,
+                      missingLabel: 'Mission Type',
+                      capitalize: true,
+                      onChanged: (v) => setState(
+                          () => _mission = _mission.copyWith(missionType: v)))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-          // Mission Date  |  Mission Type
+  // ─────────────────────────────────────────────────────────────────────────
+  // Per-category risk section
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildCategorySection(String cat) {
+    final examples = _examplesFor(cat);
+    final showDropdown = _showExampleDropdown[cat] ?? false;
+
+    return _sectionContainer(
+      title: cat.toUpperCase(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final row in _rows[cat]!) ...[
+            _buildRiskRow(cat, row),
+            const SizedBox(height: 10),
+          ],
+          Row(
+            children: [
+              if (examples.isNotEmpty)
+                _actionButton(
+                    label: 'HAZARD',
+                    color: _cSurface,
+                    textColor: _cGreenFg,
+                    borderColor: _cBorder,
+                    onPressed: () => setState(
+                        () => _showExampleDropdown[cat] = !showDropdown)),
+              const SizedBox(width: 10),
+              _actionButton(
+                  label: '+ ADD RISK',
+                  color: _cAccent.withOpacity(0.15),
+                  textColor: _cLetterLit,
+                  borderColor: _cBorderBright,
+                  onPressed: () => _addRisk(cat)),
+            ],
+          ),
+          if (showDropdown && examples.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: _buildExampleDropdown(cat, examples),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExampleDropdown(
+      String cat, List<Map<String, dynamic>> examples) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 9, 26, 15),
+        border: Border.all(color: _cBorder),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: null,
+          dropdownColor: const Color(0xFF0A1A10),
+          hint: const Text('Select a hazard…',
+              style: TextStyle(color: Color(0xFF4A6060), fontSize: 13)),
+          icon: const Icon(Icons.arrow_drop_down, color: _cLetterLit),
+          style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+          items: examples.map((ex) {
+            final name = ex['name'] as String;
+            return DropdownMenuItem<String>(value: name, child: Text(name));
+          }).toList(),
+          onChanged: (name) {
+            if (name == null) return;
+            final ex =
+                examples.firstWhere((e) => e['name'] == name, orElse: () => {});
+            final choices = (ex['choices'] as List?)?.cast<String>() ?? [];
+            _addRisk(cat, title: name, choices: choices);
+          },
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Single risk row
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildRiskRow(String cat, _RiskRow row) {
+    final catLabel = riskCategoryFrom(row.riskValue);
+    final finalCatLabel = riskCategoryFrom(row.finalRiskValue);
+    final riskPillBg = colorFromCategory(catLabel);
+    final riskPillTxt = textColorForCategory(catLabel);
+    final finalPillBg = colorFromCategory(finalCatLabel);
+    final finalPillTxt = textColorForCategory(finalCatLabel);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF060E18),
+        border: Border.all(color: _cBorder),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _riskTitleCtrl(row.id, row.title),
+            style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+            decoration: _rowInputDecoration('Risk Title'),
+            inputFormatters: [_CapitalizeFirstFormatter()],
+            onChanged: (v) {
+              row.title = v;
+              _rebuildAndSave();
+            },
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _likelihoodDropdown(row)),
+              const SizedBox(width: 10),
+              Expanded(child: _severityDropdown(row)),
+            ],
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: _missionDateField(),
+                child: row.choices.isNotEmpty
+                    ? _descriptionDropdown(row)
+                    : _descriptionTextField(row),
               ),
               const SizedBox(width: 10),
+              SizedBox(
+                width: 100,
+                child: TextField(
+                  controller: _riskDedCtrl(
+                      row.id,
+                      row.deduction == 0
+                          ? ''
+                          : row.deduction.toStringAsFixed(0)),
+                  style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+                  decoration: _rowInputDecoration('Deduction'),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))
+                  ],
+                  onChanged: (v) {
+                    row.deduction = double.tryParse(v) ?? 0;
+                    _rebuildAndSave();
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
               Expanded(
-                child: _missionTextField(
-                  key: 'missionType',
-                  value: _mission.missionType,
-                  placeholder: 'Mission Type',
-                  required: true,
-                  missingLabel: 'Mission Type',
-                  capitalize: true,
-                  onChanged: (v) => setState(
-                      () => _mission = _mission.copyWith(missionType: v)),
+                  child: _riskPill('Risk: ${row.riskValue.toInt()}', riskPillBg,
+                      riskPillTxt)),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: _riskPill('Residual: ${row.finalRiskValue.toInt()}',
+                      finalPillBg, finalPillTxt)),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => setState(() {
+                  _removeRisk(cat, row.id);
+                }),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A0505),
+                    border: Border.all(color: const Color(0xFF8B1010)),
+                  ),
+                  child: const Icon(Icons.close,
+                      color: Color(0xFFFF4444), size: 16),
                 ),
               ),
             ],
@@ -591,40 +719,181 @@ class _AssessmentTabState extends State<AssessmentTab> {
     );
   }
 
-  // ─── Mission-section TextEditingControllers (keyed so they survive rebuilds)
-  // We store them lazily in a map so we never recreate a controller for the
-  // same logical field.  Disposed in dispose().
+  Widget _likelihoodDropdown(_RiskRow row) => _buildScaleDropdown(
+      value: row.likelihood,
+      options: LIKELIHOOD_OPTIONS,
+      onChanged: (v) {
+        row.likelihood = v;
+        _rebuildAndSave();
+      });
+  Widget _severityDropdown(_RiskRow row) => _buildScaleDropdown(
+      value: row.severity,
+      options: SEVERITY_OPTIONS,
+      onChanged: (v) {
+        row.severity = v;
+        _rebuildAndSave();
+      });
+
+  Widget _buildScaleDropdown(
+      {required int value,
+      required List<Map<String, dynamic>> options,
+      required void Function(int) onChanged}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 9, 26, 15),
+        border: Border.all(color: _cBorder),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          isExpanded: true,
+          value: value,
+          dropdownColor: const Color(0xFF0A1A10),
+          icon: const Icon(Icons.arrow_drop_down, color: _cLetterLit),
+          style: const TextStyle(color: _cTextPrimary, fontSize: 13),
+          items: options.map((o) {
+            final v = o['v'] as int;
+            return DropdownMenuItem<int>(
+                value: v, child: Text('$v — ${o['label']}'));
+          }).toList(),
+          onChanged: (v) {
+            if (v != null) onChanged(v);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _descriptionTextField(_RiskRow row) => TextField(
+        controller: _riskDescCtrl(row.id, row.description),
+        style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+        decoration: _rowInputDecoration('Description'),
+        inputFormatters: [_CapitalizeFirstFormatter()],
+        onChanged: (v) {
+          row.description = v;
+          _rebuildAndSave();
+        },
+      );
+
+  Widget _descriptionDropdown(_RiskRow row) => Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 9, 26, 15),
+          border: Border.all(color: _cBorder),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            isExpanded: true,
+            value: row.description.isEmpty ? null : row.description,
+            dropdownColor: const Color(0xFF0A1A10),
+            hint: const Text('Select a choice…',
+                style: TextStyle(color: Color(0xFF4A6060))),
+            icon: const Icon(Icons.arrow_drop_down, color: _cLetterLit),
+            style: const TextStyle(color: _cTextPrimary, fontSize: 13),
+            items: row.choices
+                .map((c) => DropdownMenuItem<String>(value: c, child: Text(c)))
+                .toList(),
+            onChanged: (v) {
+              if (v != null) {
+                row.description = v;
+                _rebuildAndSave();
+              }
+            },
+          ),
+        ),
+      );
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Results section
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildResultsSection() {
+    final score = _ormScore;
+    final catLabel = score != null ? riskCategoryFrom(score) : '-';
+    final bg = score != null ? colorFromCategory(catLabel) : Colors.white;
+    final txt = score != null ? textColorForCategory(catLabel) : Colors.black;
+    final scoreText = score != null ? score.toInt().toString() : '-';
+
+    return _sectionContainer(
+      title: 'ORM RESULTS & EXPORT',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _badge('ORM RISK: $scoreText', bg, txt)),
+              const SizedBox(width: 10),
+              Expanded(child: _badge('CATEGORY: $catLabel', bg, txt)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _hudLabel('EXPORT OPTIONS'),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                  child: _exportButton(
+                      label: '💾 Excel',
+                      bg: _cSurface,
+                      txtColor: _cLetterLit,
+                      borderColor: _cBorderBright,
+                      onPressed: _exportToExcel)),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: _exportButton(
+                      label: '📝 CSV',
+                      bg: _cSurface,
+                      txtColor: _cGreenFg,
+                      borderColor: _cBorder,
+                      onPressed: _exportToCSV)),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: _exportButton(
+                      label: '📄 PDF',
+                      bg: const Color(0xFF1A1000),
+                      txtColor: const Color(0xFFFFE8C8),
+                      borderColor: const Color(0xFF8B5A00),
+                      onPressed: _exportToPDF)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _exportButton(
+              label: '📌 SAVE TO HISTORY',
+              bg: _cAccent.withOpacity(0.15),
+              txtColor: _cLetterLit,
+              borderColor: _cBorderBright,
+              onPressed: _saveToHistory),
+        ],
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Controllers
+  // ═══════════════════════════════════════════════════════════════════════════
   final Map<String, TextEditingController> _missionControllers = {};
-  // Per-risk-row controllers keyed by row.id
   final Map<String, TextEditingController> _riskTitleControllers = {};
   final Map<String, TextEditingController> _riskDescControllers = {};
   final Map<String, TextEditingController> _riskDedControllers = {};
 
   TextEditingController _missionCtrl(String key, String initialValue) {
-    if (!_missionControllers.containsKey(key)) {
+    if (!_missionControllers.containsKey(key))
       _missionControllers[key] = TextEditingController(text: initialValue);
-    }
     return _missionControllers[key]!;
   }
 
   TextEditingController _riskTitleCtrl(String id, String initialValue) {
-    if (!_riskTitleControllers.containsKey(id)) {
+    if (!_riskTitleControllers.containsKey(id))
       _riskTitleControllers[id] = TextEditingController(text: initialValue);
-    }
     return _riskTitleControllers[id]!;
   }
 
   TextEditingController _riskDescCtrl(String id, String initialValue) {
-    if (!_riskDescControllers.containsKey(id)) {
+    if (!_riskDescControllers.containsKey(id))
       _riskDescControllers[id] = TextEditingController(text: initialValue);
-    }
     return _riskDescControllers[id]!;
   }
 
   TextEditingController _riskDedCtrl(String id, String initialValue) {
-    if (!_riskDedControllers.containsKey(id)) {
+    if (!_riskDedControllers.containsKey(id))
       _riskDedControllers[id] = TextEditingController(text: initialValue);
-    }
     return _riskDedControllers[id]!;
   }
 
@@ -637,7 +906,9 @@ class _AssessmentTabState extends State<AssessmentTab> {
     super.dispose();
   }
 
-  // Shared text field used in the mission section
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Mission field builders
+  // ═══════════════════════════════════════════════════════════════════════════
   Widget _missionTextField({
     required String key,
     required String value,
@@ -657,32 +928,29 @@ class _AssessmentTabState extends State<AssessmentTab> {
       children: [
         TextField(
           controller: ctrl,
-          style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 14),
+          style: const TextStyle(color: _cTextPrimary, fontSize: 14),
           decoration: InputDecoration(
             hintText: placeholder,
-            hintStyle: const TextStyle(color: Color(0xFF777777)),
+            hintStyle: TextStyle(
+                color: isMissing
+                    ? const Color(0xFF8B3030)
+                    : const Color(0xFF4A6060),
+                fontSize: 13),
             filled: true,
-            fillColor: const Color(0xFF162A1F),
+            fillColor: isMissing
+                ? const Color(0xFF1A0505)
+                : const Color.fromARGB(255, 9, 26, 15),
             border: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: isMissing
-                    ? const Color(0xFF8B1010)
-                    : const Color(0xFF4A6741),
-              ),
-              borderRadius: BorderRadius.zero,
-            ),
+                borderSide: BorderSide(
+                    color: isMissing ? const Color(0xFF8B1010) : _cBorder),
+                borderRadius: BorderRadius.zero),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: isMissing
-                    ? const Color(0xFF8B1010)
-                    : const Color(0xFF4A6741),
-              ),
-              borderRadius: BorderRadius.zero,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: const Color(0xFFB8D4A8), width: 2),
-              borderRadius: BorderRadius.zero,
-            ),
+                borderSide: BorderSide(
+                    color: isMissing ? const Color(0xFF8B1010) : _cBorder),
+                borderRadius: BorderRadius.zero),
+            focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: _cLetterLit, width: 2),
+                borderRadius: BorderRadius.zero),
             isDense: true,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -701,12 +969,13 @@ class _AssessmentTabState extends State<AssessmentTab> {
           Padding(
             padding: const EdgeInsets.only(top: 3),
             child: Text(
-              '*Required field',
+              '* Required',
               style: TextStyle(
                 color: isMissing
-                    ? const Color(0xFFFFCDD2)
-                    : const Color(0xFF8A9A8A),
-                fontSize: 11,
+                    ? const Color(0xFFFF6060)
+                    : const Color(0xFF3A5A4A),
+                fontSize: 10,
+                letterSpacing: 1,
               ),
             ),
           ),
@@ -722,437 +991,76 @@ class _AssessmentTabState extends State<AssessmentTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: ctrl,
-          style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 14),
-          decoration: InputDecoration(
-            hintText: 'YYYY-MM-DD',
-            hintStyle: const TextStyle(color: Color(0xFF777777)),
-            filled: true,
-            fillColor: const Color(0xFF162A1F),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: isMissing
-                    ? const Color(0xFF8B1010)
-                    : const Color(0xFF4A6741),
-              ),
-              borderRadius: BorderRadius.zero,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: isMissing
-                    ? const Color(0xFF8B1010)
-                    : const Color(0xFF4A6741),
-              ),
-              borderRadius: BorderRadius.zero,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: const Color(0xFFB8D4A8), width: 2),
-              borderRadius: BorderRadius.zero,
-            ),
-            isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            prefixIcon: const Icon(Icons.calendar_today,
-                color: Color(0xFF8A9A8A), size: 18),
-          ),
-          keyboardType: const TextInputType.numberWithOptions(),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[\d\-]')),
-          ],
-          textInputAction: TextInputAction.next,
-          onChanged: (v) {
-            setState(() => _mission = _mission.copyWith(missionTime: v));
-            _saveMission();
+        GestureDetector(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _mission.missionTime.isNotEmpty
+                  ? DateTime.tryParse(_mission.missionTime) ?? DateTime.now()
+                  : DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+              builder: (ctx, child) =>
+                  Theme(data: Theme.of(ctx), child: child ?? const SizedBox()),
+            );
+            if (picked != null) {
+              final iso = picked.toIso8601String().split('T').first;
+              setState(() {
+                _mission = _mission.copyWith(missionTime: iso);
+              });
+              _missionCtrl('missionTime', iso).text = iso;
+              _saveMission();
+            }
           },
+          child: AbsorbPointer(
+            child: TextField(
+              controller: ctrl,
+              style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'YYYY-MM-DD',
+                hintStyle: TextStyle(
+                    color: isMissing
+                        ? const Color(0xFF8B3030)
+                        : const Color(0xFF4A6060),
+                    fontSize: 13),
+                filled: true,
+                fillColor: isMissing
+                    ? const Color(0xFF1A0505)
+                    : const Color.fromARGB(255, 9, 26, 15),
+                border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: isMissing ? const Color(0xFF8B1010) : _cBorder),
+                    borderRadius: BorderRadius.zero),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: isMissing ? const Color(0xFF8B1010) : _cBorder),
+                    borderRadius: BorderRadius.zero),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: _cLetterLit, width: 2),
+                    borderRadius: BorderRadius.zero),
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                prefixIcon: const Icon(Icons.calendar_today,
+                    color: Color(0xFF4A7060), size: 16),
+              ),
+              readOnly: true,
+            ),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 3),
           child: Text(
-            '📅 *Required field',
+            '📅 * Required',
             style: TextStyle(
               color:
-                  isMissing ? const Color(0xFFFFCDD2) : const Color(0xFF8A9A8A),
-              fontSize: 11,
+                  isMissing ? const Color(0xFFFF6060) : const Color(0xFF3A5A4A),
+              fontSize: 10,
+              letterSpacing: 1,
             ),
           ),
         ),
       ],
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Per-category risk section
-  // ─────────────────────────────────────────────────────────────────────────
-  Widget _buildCategorySection(String cat) {
-    final examples = _examplesFor(cat);
-    final showDropdown = _showExampleDropdown[cat] ?? false;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1C3D2C), Color(0xFF0F2419)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: const Color(0xFF4A6741)),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section heading
-          Text(cat, style: _sectionHeadingStyle()),
-          const SizedBox(height: 10),
-
-          // ── existing risk rows ──
-          for (final row in _rows[cat]!) ...[
-            _buildRiskRow(cat, row),
-            const SizedBox(height: 10),
-          ],
-
-          // ── "+ Add Risk"  &  "Use Example" buttons ──
-          Row(
-            children: [
-              _actionButton(
-                label: '+ Add Risk',
-                color: const Color(0xFF4A6741),
-                textColor: const Color(0xFFD4E8C8),
-                onPressed: () => _addRisk(cat),
-              ),
-              const SizedBox(width: 10),
-              if (examples.isNotEmpty)
-                _actionButton(
-                  label: 'Use Example',
-                  color: const Color(0xFF2D5016),
-                  textColor: const Color(0xFFD4E8C8),
-                  onPressed: () =>
-                      setState(() => _showExampleDropdown[cat] = !showDropdown),
-                ),
-            ],
-          ),
-
-          // ── example dropdown (visible when toggled) ──
-          if (showDropdown && examples.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: _buildExampleDropdown(cat, examples),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExampleDropdown(
-      String cat, List<Map<String, dynamic>> examples) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF162A1F),
-        border: Border.all(color: const Color(0xFF4A6741)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          isExpanded: true,
-          value: null, // always null – selecting fires onChanged then resets
-          hint: const Text('Select an example…',
-              style: TextStyle(color: Color(0xFF777777))),
-          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFB8D4A8)),
-          style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 14),
-          items: examples.map((ex) {
-            final name = ex['name'] as String;
-            return DropdownMenuItem<String>(value: name, child: Text(name));
-          }).toList(),
-          onChanged: (name) {
-            if (name == null) return;
-            final ex =
-                examples.firstWhere((e) => e['name'] == name, orElse: () => {});
-            final choices = (ex['choices'] as List?)?.cast<String>() ?? [];
-            _addRisk(cat, title: name, choices: choices);
-          },
-        ),
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Single risk row  (mirrors the HTML .input-row block)
-  // ─────────────────────────────────────────────────────────────────────────
-  Widget _buildRiskRow(String cat, _RiskRow row) {
-    final catLabel = riskCategoryFrom(row.riskValue);
-    final finalCatLabel = riskCategoryFrom(row.finalRiskValue);
-    final riskPillBg = colorFromCategory(catLabel);
-    final riskPillTxt = textColorForCategory(catLabel);
-    final finalPillBg = colorFromCategory(finalCatLabel);
-    final finalPillTxt = textColorForCategory(finalCatLabel);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F2419),
-        border: Border.all(color: const Color(0xFF2A4A3A)),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Title ──
-          TextField(
-            controller: _riskTitleCtrl(row.id, row.title),
-            style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 14),
-            decoration: _rowInputDecoration('Risk Title'),
-            inputFormatters: [_CapitalizeFirstFormatter()],
-            onChanged: (v) {
-              row.title = v;
-              _rebuildAndSave();
-            },
-          ),
-          const SizedBox(height: 8),
-
-          // ── Likelihood | Severity ──
-          Row(
-            children: [
-              Expanded(child: _likelihoodDropdown(row)),
-              const SizedBox(width: 10),
-              Expanded(child: _severityDropdown(row)),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // ── Description | Deduction ──
-          Row(
-            children: [
-              Expanded(
-                child: row.choices.isNotEmpty
-                    ? _descriptionDropdown(row)
-                    : _descriptionTextField(row),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 100,
-                child: TextField(
-                  controller: _riskDedCtrl(
-                      row.id,
-                      row.deduction == 0
-                          ? ''
-                          : row.deduction.toStringAsFixed(0)),
-                  style:
-                      const TextStyle(color: Color(0xFFE0E0E0), fontSize: 14),
-                  decoration: _rowInputDecoration('Deduction'),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-                  ],
-                  onChanged: (v) {
-                    row.deduction = double.tryParse(v) ?? 0;
-                    _rebuildAndSave();
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // ── Risk Value pill | Residual Risk pill | Delete button ──
-          Row(
-            children: [
-              Expanded(
-                child: _riskPill('Risk Value: ${row.riskValue.toInt()}',
-                    riskPillBg, riskPillTxt),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _riskPill('Residual Risk: ${row.finalRiskValue.toInt()}',
-                    finalPillBg, finalPillTxt),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () => setState(() {
-                  _removeRisk(cat, row.id);
-                }),
-                icon: const Icon(Icons.cancel,
-                    color: Color(0xFFF44336), size: 22),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                tooltip: 'Delete',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _likelihoodDropdown(_RiskRow row) => _buildScaleDropdown(
-        value: row.likelihood,
-        options: LIKELIHOOD_OPTIONS,
-        onChanged: (v) {
-          row.likelihood = v;
-          _rebuildAndSave();
-        },
-      );
-
-  Widget _severityDropdown(_RiskRow row) => _buildScaleDropdown(
-        value: row.severity,
-        options: SEVERITY_OPTIONS,
-        onChanged: (v) {
-          row.severity = v;
-          _rebuildAndSave();
-        },
-      );
-
-  Widget _buildScaleDropdown({
-    required int value,
-    required List<Map<String, dynamic>> options,
-    required void Function(int) onChanged,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF162A1F),
-        border: Border.all(color: const Color(0xFF4A6741)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          isExpanded: true,
-          value: value,
-          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFB8D4A8)),
-          style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 13),
-          items: options.map((o) {
-            final v = o['v'] as int;
-            return DropdownMenuItem<int>(
-              value: v,
-              child: Text('$v - ${o['label']}'),
-            );
-          }).toList(),
-          onChanged: (v) {
-            if (v != null) onChanged(v);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _descriptionTextField(_RiskRow row) => TextField(
-        controller: _riskDescCtrl(row.id, row.description),
-        style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 14),
-        decoration: _rowInputDecoration('Description'),
-        inputFormatters: [_CapitalizeFirstFormatter()],
-        onChanged: (v) {
-          row.description = v;
-          _rebuildAndSave();
-        },
-      );
-
-  Widget _descriptionDropdown(_RiskRow row) => Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF162A1F),
-          border: Border.all(color: const Color(0xFF4A6741)),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            isExpanded: true,
-            value: row.description.isEmpty ? null : row.description,
-            hint: const Text('Select a choice…',
-                style: TextStyle(color: Color(0xFF777777))),
-            icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFB8D4A8)),
-            style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 13),
-            items: row.choices
-                .map((c) => DropdownMenuItem<String>(value: c, child: Text(c)))
-                .toList(),
-            onChanged: (v) {
-              if (v != null) {
-                row.description = v;
-                _rebuildAndSave();
-              }
-            },
-          ),
-        ),
-      );
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Results section (ORM badges + export buttons)  – mirrors HTML #results
-  // ─────────────────────────────────────────────────────────────────────────
-  Widget _buildResultsSection() {
-    final score = _ormScore;
-    final catLabel = score != null ? riskCategoryFrom(score) : '-';
-    final bg = score != null ? colorFromCategory(catLabel) : Colors.white;
-    final txt = score != null ? textColorForCategory(catLabel) : Colors.black;
-    final scoreText = score != null ? score.toInt().toString() : '-';
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1C3D2C), Color(0xFF0F2419)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: const Color(0xFF4A6741)),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── ORM badges ──
-          Row(
-            children: [
-              Expanded(
-                child: _badge('ORM Risk: $scoreText', bg, txt),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _badge('Risk Category: $catLabel', bg, txt),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // ── Export buttons ──
-          Text('Export Options', style: _sectionHeadingStyle()),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _exportButton(
-                  label: '💾 Save to Excel',
-                  bg: const Color(0xFF2D5016),
-                  txtColor: const Color(0xFFD4E8C8),
-                  onPressed: _exportToExcel,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _exportButton(
-                  label: '📝 Save as CSV',
-                  bg: const Color(0xFF4A6741),
-                  txtColor: const Color(0xFFD4E8C8),
-                  onPressed: _exportToCSV,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _exportButton(
-                  label: '📄 Save to PDF',
-                  bg: const Color(0xFF8B5A00),
-                  txtColor: const Color(0xFFFFE8C8),
-                  onPressed: _exportToPDF,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _exportButton(
-                  label: '📌 Save to History',
-                  bg: const Color(0xFF4A6741),
-                  txtColor: const Color(0xFFD4E8C8),
-                  onPressed: _saveToHistory,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -1164,103 +1072,152 @@ class _AssessmentTabState extends State<AssessmentTab> {
     _save();
   }
 
-  TextStyle _sectionHeadingStyle() => const TextStyle(
-        color: Color(0xFFB8D4A8),
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      );
+  /// Section container with HUD-style header
+  Widget _sectionContainer({required String title, required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _cSurface,
+        border: Border.all(color: _cBorder),
+        boxShadow: [
+          BoxShadow(color: _cAccent.withOpacity(0.04), blurRadius: 12)
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // header bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            decoration: BoxDecoration(
+              color: _cAccent.withOpacity(0.08),
+              border: Border(bottom: BorderSide(color: _cBorder)),
+            ),
+            child: Row(
+              children: [
+                Container(width: 3, height: 14, color: _cLetterLit),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: _cLetterLit,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    letterSpacing: 2.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(padding: const EdgeInsets.all(14), child: child),
+        ],
+      ),
+    );
+  }
 
   InputDecoration _rowInputDecoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF777777)),
+        hintStyle: const TextStyle(color: Color(0xFF4A6060), fontSize: 13),
         filled: true,
-        fillColor: const Color(0xFF162A1F),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: const Color(0xFF4A6741)),
-          borderRadius: BorderRadius.zero,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: const Color(0xFF4A6741)),
-          borderRadius: BorderRadius.zero,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: const Color(0xFFB8D4A8), width: 2),
-          borderRadius: BorderRadius.zero,
-        ),
+        fillColor: const Color.fromARGB(255, 9, 26, 15),
+        border: const OutlineInputBorder(
+            borderSide: BorderSide(color: _cBorder),
+            borderRadius: BorderRadius.zero),
+        enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: _cBorder),
+            borderRadius: BorderRadius.zero),
+        focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: _cLetterLit, width: 2),
+            borderRadius: BorderRadius.zero),
         isDense: true,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       );
 
   Widget _riskPill(String text, Color bg, Color txtColor) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: bg,
-          border: Border.all(color: bg.withOpacity(0.7)),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-              color: txtColor, fontSize: 13, fontWeight: FontWeight.w600),
-          textAlign: TextAlign.center,
-        ),
+            color: bg, border: Border.all(color: bg.withOpacity(0.6))),
+        child: Text(text,
+            style: TextStyle(
+                color: txtColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5),
+            textAlign: TextAlign.center),
       );
 
   Widget _badge(String text, Color bg, Color txtColor) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: bg,
-          border: Border.all(color: const Color(0xFFCCD6FF)),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-              color: txtColor, fontSize: 15, fontWeight: FontWeight.bold),
+            color: bg,
+            border: Border.all(color: _cBorderBright.withOpacity(0.5))),
+        child: Text(text,
+            style: TextStyle(
+                color: txtColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1)),
+      );
+
+  Widget _hudLabel(String text) => Row(
+        children: [
+          const Text('▸ ', style: TextStyle(color: _cAccent, fontSize: 10)),
+          Text(text,
+              style: const TextStyle(
+                  color: _cTextSub,
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w700)),
+        ],
+      );
+
+  Widget _actionButton(
+          {required String label,
+          required Color color,
+          required Color textColor,
+          required Color borderColor,
+          required VoidCallback onPressed}) =>
+      GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+              color: color, border: Border.all(color: borderColor)),
+          child: Text(label,
+              style: TextStyle(
+                  color: textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5)),
         ),
       );
 
-  Widget _actionButton({
-    required String label,
-    required Color color,
-    required Color textColor,
-    required VoidCallback onPressed,
-  }) =>
-      ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: textColor,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          minimumSize: const Size(0, 0),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+  Widget _exportButton(
+          {required String label,
+          required Color bg,
+          required Color txtColor,
+          required Color borderColor,
+          required Future<void> Function() onPressed}) =>
+      GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          decoration:
+              BoxDecoration(color: bg, border: Border.all(color: borderColor)),
+          child: Center(
+              child: Text(label,
+                  style: TextStyle(
+                      color: txtColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1))),
         ),
-        child: Text(label, style: TextStyle(color: textColor, fontSize: 14)),
-      );
-
-  Widget _exportButton({
-    required String label,
-    required Color bg,
-    required Color txtColor,
-    required Future<void> Function() onPressed,
-  }) =>
-      ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: bg,
-          foregroundColor: txtColor,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-        ),
-        child: Text(label, style: TextStyle(color: txtColor)),
       );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TextInputFormatters
 // ─────────────────────────────────────────────────────────────────────────────
-
-/// Capitalises only the very first character (mirrors JS capitalizeFirstLetter)
 class _CapitalizeFirstFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -1272,11 +1229,9 @@ class _CapitalizeFirstFormatter extends TextInputFormatter {
   }
 }
 
-/// Forces all characters to uppercase (mirrors JS handleUppercaseCapitalization)
 class _UpperCaseFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    return newValue.copyWith(text: newValue.text.toUpperCase());
-  }
+          TextEditingValue oldValue, TextEditingValue newValue) =>
+      newValue.copyWith(text: newValue.text.toUpperCase());
 }
