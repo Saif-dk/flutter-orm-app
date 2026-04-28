@@ -418,12 +418,12 @@ class _AssessmentTabState extends State<AssessmentTab> {
             children: [
               Icon(Icons.warning_amber, color: Color(0xFFFFB74D), size: 18),
               SizedBox(width: 8),
-              Text(
+                Text(
                 'FORM INCOMPLETE',
                 style: TextStyle(
                   color: Color(0xFFFFB74D),
                   fontWeight: FontWeight.w900,
-                  fontSize: 13,
+                  fontSize: 9,
                   letterSpacing: 2.5,
                 ),
               ),
@@ -433,7 +433,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
           const Text(
             'Please fill in the following required fields:',
             style:
-                TextStyle(color: _cTextSub, fontSize: 12, letterSpacing: 0.5),
+                TextStyle(color: _cTextSub, fontSize: 8, letterSpacing: 0.5, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           for (final f in _missingFields)
@@ -441,11 +441,11 @@ class _AssessmentTabState extends State<AssessmentTab> {
               padding: const EdgeInsets.only(top: 2),
               child: Row(
                 children: [
-                  const Text('▸ ',
-                      style: TextStyle(color: Color(0xFFFF6060), fontSize: 10)),
-                  Text(f,
+                    const Text('▸ ',
+                      style: TextStyle(color: Color(0xFFFF6060), fontSize: 6, fontWeight: FontWeight.bold)),
+                    Text(f,
                       style: const TextStyle(
-                          color: Color(0xFFFFCDD2), fontSize: 12)),
+                        color: Color(0xFFFFCDD2), fontSize: 8, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
@@ -597,10 +597,10 @@ class _AssessmentTabState extends State<AssessmentTab> {
           isExpanded: true,
           value: null,
           dropdownColor: const Color(0xFF0A1A10),
-          hint: const Text('Select a hazard…',
-              style: TextStyle(color: Color(0xFF4A6060), fontSize: 13)),
+            hint: const Text('Select a hazard…',
+              style: TextStyle(color: Color(0xFF4A6060), fontSize: 9, fontWeight: FontWeight.bold)),
           icon: const Icon(Icons.arrow_drop_down, color: _cLetterLit),
-          style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+          style: const TextStyle(color: _cTextPrimary, fontSize: 10, fontWeight: FontWeight.bold),
           items: examples.map((ex) {
             final name = ex['name'] as String;
             return DropdownMenuItem<String>(value: name, child: Text(name));
@@ -639,7 +639,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
         children: [
           TextField(
             controller: _riskTitleCtrl(row.id, row.title),
-            style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+            style: const TextStyle(color: _cTextPrimary, fontSize: 10, fontWeight: FontWeight.bold),
             decoration: _rowInputDecoration('Risk Title'),
             inputFormatters: [_CapitalizeFirstFormatter()],
             onChanged: (v) {
@@ -672,7 +672,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
                       row.deduction == 0
                           ? ''
                           : row.deduction.toStringAsFixed(0)),
-                  style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+                  style: const TextStyle(color: _cTextPrimary, fontSize: 10, fontWeight: FontWeight.bold),
                   decoration: _rowInputDecoration('Deduction'),
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
@@ -749,7 +749,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
           value: value,
           dropdownColor: const Color(0xFF0A1A10),
           icon: const Icon(Icons.arrow_drop_down, color: _cLetterLit),
-          style: const TextStyle(color: _cTextPrimary, fontSize: 13),
+          style: const TextStyle(color: _cTextPrimary, fontSize: 9, fontWeight: FontWeight.bold),
           items: options.map((o) {
             final v = o['v'] as int;
             return DropdownMenuItem<int>(
@@ -765,7 +765,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
 
   Widget _descriptionTextField(_RiskRow row) => TextField(
         controller: _riskDescCtrl(row.id, row.description),
-        style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+        style: const TextStyle(color: _cTextPrimary, fontSize: 10, fontWeight: FontWeight.bold),
         decoration: _rowInputDecoration('Description'),
         inputFormatters: [_CapitalizeFirstFormatter()],
         onChanged: (v) {
@@ -785,9 +785,9 @@ class _AssessmentTabState extends State<AssessmentTab> {
             value: row.description.isEmpty ? null : row.description,
             dropdownColor: const Color(0xFF0A1A10),
             hint: const Text('Select a choice…',
-                style: TextStyle(color: Color(0xFF4A6060))),
+              style: TextStyle(color: Color(0xFF4A6060), fontWeight: FontWeight.bold)),
             icon: const Icon(Icons.arrow_drop_down, color: _cLetterLit),
-            style: const TextStyle(color: _cTextPrimary, fontSize: 13),
+            style: const TextStyle(color: _cTextPrimary, fontSize: 9, fontWeight: FontWeight.bold),
             items: row.choices
                 .map((c) => DropdownMenuItem<String>(value: c, child: Text(c)))
                 .toList(),
@@ -928,14 +928,14 @@ class _AssessmentTabState extends State<AssessmentTab> {
       children: [
         TextField(
           controller: ctrl,
-          style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+          style: const TextStyle(color: _cTextPrimary, fontSize: 10, fontWeight: FontWeight.bold),
           decoration: InputDecoration(
             hintText: placeholder,
             hintStyle: TextStyle(
                 color: isMissing
                     ? const Color(0xFF8B3030)
                     : const Color(0xFF4A6060),
-                fontSize: 13),
+                fontSize: 9, fontWeight: FontWeight.bold),
             filled: true,
             fillColor: isMissing
                 ? const Color(0xFF1A0505)
@@ -974,7 +974,8 @@ class _AssessmentTabState extends State<AssessmentTab> {
                 color: isMissing
                     ? const Color(0xFFFF6060)
                     : const Color(0xFF3A5A4A),
-                fontSize: 10,
+                fontSize: 6,
+                fontWeight: FontWeight.bold,
                 letterSpacing: 1,
               ),
             ),
@@ -1012,17 +1013,17 @@ class _AssessmentTabState extends State<AssessmentTab> {
               _saveMission();
             }
           },
-          child: AbsorbPointer(
+            child: AbsorbPointer(
             child: TextField(
               controller: ctrl,
-              style: const TextStyle(color: _cTextPrimary, fontSize: 14),
+              style: const TextStyle(color: _cTextPrimary, fontSize: 10, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 hintText: 'YYYY-MM-DD',
                 hintStyle: TextStyle(
                     color: isMissing
                         ? const Color(0xFF8B3030)
                         : const Color(0xFF4A6060),
-                    fontSize: 13),
+                    fontSize: 9, fontWeight: FontWeight.bold),
                 filled: true,
                 fillColor: isMissing
                     ? const Color(0xFF1A0505)
@@ -1055,7 +1056,8 @@ class _AssessmentTabState extends State<AssessmentTab> {
             style: TextStyle(
               color:
                   isMissing ? const Color(0xFFFF6060) : const Color(0xFF3A5A4A),
-              fontSize: 10,
+              fontSize: 6,
+              fontWeight: FontWeight.bold,
               letterSpacing: 1,
             ),
           ),
@@ -1101,7 +1103,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
                   style: const TextStyle(
                     color: _cLetterLit,
                     fontWeight: FontWeight.w800,
-                    fontSize: 11,
+                    fontSize: 7,
                     letterSpacing: 2.5,
                   ),
                 ),
@@ -1116,7 +1118,7 @@ class _AssessmentTabState extends State<AssessmentTab> {
 
   InputDecoration _rowInputDecoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF4A6060), fontSize: 13),
+        hintStyle: const TextStyle(color: Color(0xFF4A6060), fontSize: 9, fontWeight: FontWeight.bold),
         filled: true,
         fillColor: const Color.fromARGB(255, 9, 26, 15),
         border: const OutlineInputBorder(
@@ -1138,12 +1140,12 @@ class _AssessmentTabState extends State<AssessmentTab> {
         decoration: BoxDecoration(
             color: bg, border: Border.all(color: bg.withOpacity(0.6))),
         child: Text(text,
-            style: TextStyle(
-                color: txtColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5),
-            textAlign: TextAlign.center),
+          style: TextStyle(
+            color: txtColor,
+            fontSize: 8,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5),
+          textAlign: TextAlign.center),
       );
 
   Widget _badge(String text, Color bg, Color txtColor) => Container(
@@ -1152,22 +1154,22 @@ class _AssessmentTabState extends State<AssessmentTab> {
             color: bg,
             border: Border.all(color: _cBorderBright.withOpacity(0.5))),
         child: Text(text,
-            style: TextStyle(
-                color: txtColor,
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1)),
+          style: TextStyle(
+            color: txtColor,
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1)),
       );
 
   Widget _hudLabel(String text) => Row(
         children: [
-          const Text('▸ ', style: TextStyle(color: _cAccent, fontSize: 10)),
-          Text(text,
+            const Text('▸ ', style: TextStyle(color: _cAccent, fontSize: 6, fontWeight: FontWeight.bold)),
+            Text(text,
               style: const TextStyle(
-                  color: _cTextSub,
-                  fontSize: 10,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w700)),
+                color: _cTextSub,
+                fontSize: 6,
+                letterSpacing: 2,
+                fontWeight: FontWeight.w700)),
         ],
       );
 
@@ -1183,12 +1185,12 @@ class _AssessmentTabState extends State<AssessmentTab> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
               color: color, border: Border.all(color: borderColor)),
-          child: Text(label,
+            child: Text(label,
               style: TextStyle(
-                  color: textColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5)),
+                color: textColor,
+                fontSize: 8,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5)),
         ),
       );
 
@@ -1205,12 +1207,12 @@ class _AssessmentTabState extends State<AssessmentTab> {
           decoration:
               BoxDecoration(color: bg, border: Border.all(color: borderColor)),
           child: Center(
-              child: Text(label,
+                child: Text(label,
                   style: TextStyle(
-                      color: txtColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1))),
+                    color: txtColor,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1))),
         ),
       );
 }

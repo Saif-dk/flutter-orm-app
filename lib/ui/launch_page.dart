@@ -322,7 +322,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
               style: TextStyle(
                 color: Color.fromARGB(255, 79, 255, 138),
                 fontWeight: FontWeight.w900,
-                fontSize: 13,
+                fontSize: 9,
                 letterSpacing: 3,
               ),
             ),
@@ -333,25 +333,26 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text('OPERATIONAL RISK',
-                    style: TextStyle(
-                        color: _cTextPrimary,
-                        fontSize: 16,
-                        letterSpacing: 1.8,
-                        fontWeight: FontWeight.w700)),
+                  style: TextStyle(
+                    color: _cTextPrimary,
+                    fontSize: 8,
+                    letterSpacing: 1.8,
+                    fontWeight: FontWeight.w700)),
                 Text('MANAGEMENT SYSTEM',
-                    style: TextStyle(
-                        color: Color.fromARGB(255, 102, 204, 145),
-                        fontSize: 15,
-                        letterSpacing: 1.5)),
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 102, 204, 145),
+                    fontSize: 7,
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.bold)),
               ],
             ),
           ),
           // Live indicator
           _PulsingDot(),
           const SizedBox(width: 6),
-          const Text('SYS ONLINE',
+            const Text('SYS ONLINE',
               style: TextStyle(
-                  color: Color(0xFF60DD80), fontSize: 15, letterSpacing: 1.4)),
+                color: Color(0xFF60DD80), fontSize: 7, letterSpacing: 1.4, fontWeight: FontWeight.bold)),
           const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -360,10 +361,11 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
               color: const Color.fromARGB(255, 9, 26, 15),
             ),
             child: const Text('31 UA',
-                style: TextStyle(
-                    color: Color.fromARGB(255, 102, 204, 146),
-                    fontSize: 16,
-                    letterSpacing: 1.5)),
+              style: TextStyle(
+                color: Color.fromARGB(255, 102, 204, 146),
+                fontSize: 8,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -422,7 +424,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
             duration: const Duration(milliseconds: 180),
             style: TextStyle(
               fontFamily: 'monospace',
-              fontSize: 37,
+              fontSize: 29,
               fontWeight: FontWeight.w900,
               letterSpacing: 2,
               color: lit
@@ -456,16 +458,17 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
             'RISK ASSESSMENT MODEL',
             style: TextStyle(
                 color: Color.fromARGB(255, 102, 204, 150),
-                fontSize: 16,
-                letterSpacing: 3),
+                fontSize: 8,
+                letterSpacing: 3,
+                fontWeight: FontWeight.bold),
           ),
           const SizedBox(width: 4),
           AnimatedOpacity(
             opacity: _cursorVisible ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 80),
             child: const Text('█',
-                style: TextStyle(
-                    color: Color.fromARGB(255, 61, 232, 118), fontSize: 11)),
+              style: TextStyle(
+                color: Color.fromARGB(255, 61, 232, 118), fontSize: 3, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -516,7 +519,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                 Text(
                   _letters[i],
                   style: TextStyle(
-                    fontSize: 23,
+                    fontSize: 19,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1,
                     color: isSelected
@@ -537,7 +540,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                 Text(
                   '${i + 1}'.padLeft(2, '0'),
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 9,
                     color: isSelected
                         ? const Color.fromARGB(255, 61, 232, 127)
                         : const Color.fromARGB(255, 26, 80, 54),
@@ -578,7 +581,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                   'SELECT A LETTER TO VIEW DETAILS',
                   style: TextStyle(
                     color: Color.fromARGB(255, 45, 120, 70),
-                    fontSize: 16,
+                    fontSize: 12,
                     letterSpacing: 2,
                   ),
                 ),
@@ -619,7 +622,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                       _letters[_selected!],
                       style: const TextStyle(
                         color: Color.fromARGB(255, 79, 255, 155),
-                        fontSize: 27,
+                        fontSize: 19,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -628,25 +631,26 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                        children: [
                         Text(
                           _acronyms[_selected!].toUpperCase(),
                           style: const TextStyle(
-                            color: _cLetterGlow,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
-                            letterSpacing: 2.5,
-                          ),
+                              color: _cLetterGlow,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 10,
+                              letterSpacing: 2.5,
+                            ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           _descriptions[_selected!],
                           style: const TextStyle(
-                            color: Color.fromARGB(255, 130, 200, 160),
-                            fontSize: 16,
-                            height: 1.5,
-                            letterSpacing: 0.5,
-                          ),
+                              color: Color.fromARGB(255, 130, 200, 160),
+                              fontSize: 8,
+                              height: 1.5,
+                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.bold,
+                            ),
                         ),
                       ],
                     ),
@@ -669,9 +673,9 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
         children: [
           Container(width: 4, color: const Color.fromARGB(255, 61, 232, 127)),
           const SizedBox(width: 10),
-          const Text('CREW READY',
+            const Text('CREW READY',
               style:
-                  TextStyle(color: _cTextSub, fontSize: 15, letterSpacing: 2)),
+                TextStyle(color: _cTextSub, fontSize: 7, letterSpacing: 2, fontWeight: FontWeight.bold)),
           const Spacer(),
           _BlinkingText('◉ SYSTEM NOMINAL', color: const Color(0xFF60DD80)),
           const SizedBox(width: 10),
@@ -712,7 +716,7 @@ class _LaunchPageState extends State<LaunchPage> with TickerProviderStateMixin {
                   style: const TextStyle(
                     color: _cGreenFg,
                     fontWeight: FontWeight.w900,
-                    fontSize: 19,
+                    fontSize: 11,
                     letterSpacing: 3,
                   ),
                 ),
@@ -733,23 +737,23 @@ class _HUDRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
+          SizedBox(
           width: 73,
           child: Text(label,
-              style: const TextStyle(
-                  color: Color.fromARGB(255, 5, 253, 141),
-                  fontSize: 15,
-                  letterSpacing: 1.6)),
+            style: const TextStyle(
+              color: Color.fromARGB(255, 5, 253, 141),
+              fontSize: 7,
+              letterSpacing: 1.6, fontWeight: FontWeight.bold)),
         ),
         const Text('▸ ',
-            style: TextStyle(
-                color: Color.fromARGB(255, 36, 238, 144), fontSize: 15)),
+          style: TextStyle(
+            color: Color.fromARGB(255, 36, 238, 144), fontSize: 7, fontWeight: FontWeight.bold)),
         Text(value,
-            style: const TextStyle(
-                color: _cTextPrimary,
-                fontSize: 15,
-                letterSpacing: 1.4,
-                fontWeight: FontWeight.w700)),
+          style: const TextStyle(
+            color: _cTextPrimary,
+            fontSize: 7,
+            letterSpacing: 1.4,
+            fontWeight: FontWeight.w700)),
       ],
     );
   }
@@ -833,8 +837,8 @@ class _BlinkingTextState extends State<_BlinkingText>
       builder: (_, __) => Opacity(
         opacity: 0.5 + _c.value * 0.5,
         child: Text(widget.text,
-            style: TextStyle(
-                color: widget.color, fontSize: 15, letterSpacing: 1.8)),
+          style: TextStyle(
+            color: widget.color, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.8)),
       ),
     );
   }

@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                             style: TextStyle(
                               color: _cLetterLit,
                               fontWeight: FontWeight.w900,
-                              fontSize: 14,
+                              fontSize: 10,
                               letterSpacing: 4,
                             ),
                           ),
@@ -114,8 +114,9 @@ class _HomePageState extends State<HomePage> {
                           'OPERATIONAL RISK MANAGEMENT',
                           style: TextStyle(
                             color: _cTextSub,
-                            fontSize: 8,
+                            fontSize: 4,
                             letterSpacing: 2.2,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -160,8 +161,8 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
           selectedItemColor: _cLetterLit,
           unselectedItemColor: const Color(0xFF4A6060),
-          selectedFontSize: 10,
-          unselectedFontSize: 10,
+          selectedFontSize: 6,
+          unselectedFontSize: 6,
           type: BottomNavigationBarType.fixed,
           selectedLabelStyle: const TextStyle(
             letterSpacing: 1.4,

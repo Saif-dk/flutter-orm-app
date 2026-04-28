@@ -31,7 +31,7 @@ class HistoryDetailPage extends StatelessWidget {
             color: _cLetterLit,
             letterSpacing: 3,
             fontWeight: FontWeight.w900,
-            fontSize: 23,
+            fontSize: 19,
           ),
         ),
         backgroundColor: _cSurface,
@@ -74,7 +74,7 @@ class HistoryDetailPage extends StatelessWidget {
                         ? history.mission.missionType.toUpperCase()
                         : 'UNTITLED ASSESSMENT',
                     style: const TextStyle(
-                      fontSize: 27,
+                      fontSize: 23,
                       fontWeight: FontWeight.w900,
                       color: _cLetterLit,
                       letterSpacing: 2.5,
@@ -84,13 +84,14 @@ class HistoryDetailPage extends StatelessWidget {
                   Row(
                     children: [
                       const Text('▸ ',
-                          style: TextStyle(color: _cAccent, fontSize: 15)),
+                          style: TextStyle(color: _cAccent, fontSize: 13, fontWeight: FontWeight.bold)),
                       Text(
                         'SAVED: $createdAt',
                         style: const TextStyle(
                           color: _cTextSub,
-                          fontSize: 18,
+                          fontSize: 14,
                           letterSpacing: 1.4,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -140,11 +141,11 @@ class HistoryDetailPage extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 19,
-            fontWeight: FontWeight.w800,
-            color: _cLetterLit,
-            letterSpacing: 3,
-          ),
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: _cLetterLit,
+              letterSpacing: 3,
+            ),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -174,15 +175,15 @@ class HistoryDetailPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('▸ ', style: TextStyle(color: _cAccent, fontSize: 17)),
+          const Text('▸ ', style: TextStyle(color: _cAccent, fontSize: 13, fontWeight: FontWeight.bold)),
           SizedBox(
             width: 120,
-            child: Text(
+              child: Text(
               label.toUpperCase(),
               style: const TextStyle(
                 color: _cLetterLit,
                 fontWeight: FontWeight.w700,
-                fontSize: 17,
+                fontSize: 13,
                 letterSpacing: 1.4,
               ),
             ),
@@ -192,8 +193,9 @@ class HistoryDetailPage extends StatelessWidget {
               value.isNotEmpty ? value : '—',
               style: const TextStyle(
                 color: _cTextPrimary,
-                fontSize: 20,
+                fontSize: 16,
                 letterSpacing: 0.5,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -234,7 +236,7 @@ class HistoryDetailPage extends StatelessWidget {
                     style: const TextStyle(
                       color: _cLetterGlow,
                       fontWeight: FontWeight.w800,
-                      fontSize: 19,
+                      fontSize: 15,
                       letterSpacing: 2,
                     ),
                   ),
@@ -305,7 +307,7 @@ class HistoryDetailPage extends StatelessWidget {
             label,
             style: TextStyle(
               color: highlight ? _cLetterLit : _cTextSub,
-              fontSize: 15,
+              fontSize: 11,
               letterSpacing: 1.5,
               fontWeight: FontWeight.w700,
             ),
@@ -315,7 +317,7 @@ class HistoryDetailPage extends StatelessWidget {
             value,
             style: TextStyle(
               color: highlight ? _cLetterGlow : _cTextPrimary,
-              fontSize: 17,
+              fontSize: 13,
               fontWeight: FontWeight.w900,
             ),
           ),

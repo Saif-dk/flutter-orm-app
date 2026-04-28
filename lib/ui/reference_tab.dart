@@ -237,8 +237,8 @@ class _ReferenceTabState extends State<ReferenceTab> {
                     DataCell(_numCell(r[0].toString())),
                     DataCell(_boldCell(r[1].toString())),
                     DataCell(Text(r[2].toString(),
-                        style: const TextStyle(
-                            color: _cTextPrimary, fontSize: 20))),
+                      style: const TextStyle(
+                        color: _cTextPrimary, fontSize: 16, fontWeight: FontWeight.bold))),
                   ],
                 ))
             .toList(),
@@ -265,14 +265,14 @@ class _ReferenceTabState extends State<ReferenceTab> {
                 style: TextStyle(
                     color: _cLetterGlow,
                     fontWeight: FontWeight.w800,
-                    fontSize: 20,
+                    fontSize: 16,
                     letterSpacing: 0.5),
               ),
             ),
             const SizedBox(height: 8),
             const Text(
               'Example: Likelihood = 3 (Remote) × Severity = 4 (Critical) = 12 − 5 (Deduction) → Residual Risk = 7',
-              style: TextStyle(color: _cTextSub, fontSize: 14),
+              style: TextStyle(color: _cTextSub, fontSize: 10, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _hudLabel('RISK MATRIX (LIKELIHOOD × SEVERITY)'),
@@ -340,11 +340,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
             color: _cSurface, border: Border.all(color: _cBorder)),
         child: const Center(
             child: Text('Likelihood ↕',
-                style: TextStyle(
-                    color: _cLetterLit,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    letterSpacing: 0.5))),
+              style: TextStyle(
+                color: _cLetterLit,
+                fontWeight: FontWeight.w700,
+                fontSize: 9,
+                letterSpacing: 0.5))),
       );
 
   Widget _matrixHeaderCell(String label) => Container(
@@ -353,12 +353,12 @@ class _ReferenceTabState extends State<ReferenceTab> {
         decoration: BoxDecoration(
             color: _cSurface, border: Border.all(color: _cBorder)),
         child: Center(
-            child: Text(label,
-                style: const TextStyle(
-                    color: _cGreenFg,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 17),
-                textAlign: TextAlign.center)),
+        child: Text(label,
+          style: const TextStyle(
+            color: _cGreenFg,
+            fontWeight: FontWeight.w700,
+            fontSize: 13),
+          textAlign: TextAlign.center)),
       );
 
   Widget _matrixRowHeader(String label) => Container(
@@ -367,11 +367,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
         decoration: BoxDecoration(
             color: _cSurface, border: Border.all(color: _cBorder)),
         child: Center(
-            child: Text(label,
-                style: const TextStyle(
-                    color: _cGreenFg,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16))),
+        child: Text(label,
+          style: const TextStyle(
+            color: _cGreenFg,
+            fontWeight: FontWeight.w700,
+            fontSize: 12))),
       );
 
   Widget _matrixDataCell(int score) => Container(
@@ -380,11 +380,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
         decoration: BoxDecoration(
             color: _matrixBg(score), border: Border.all(color: _cBorder)),
         child: Center(
-            child: Text(score.toString(),
-                style: TextStyle(
-                    color: _matrixTxt(score),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20))),
+        child: Text(score.toString(),
+          style: TextStyle(
+            color: _matrixTxt(score),
+            fontWeight: FontWeight.w900,
+            fontSize: 16))),
       );
 
   Widget _buildScoreLegend() {
@@ -436,15 +436,15 @@ class _ReferenceTabState extends State<ReferenceTab> {
                                 .withOpacity(0.3)),
                       ),
                       child: Text(r[1],
-                          style: TextStyle(
-                              color: badgeTxt[r[1]],
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                              letterSpacing: 0.5)),
+                        style: TextStyle(
+                          color: badgeTxt[r[1]],
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                          letterSpacing: 0.5)),
                     )),
                     DataCell(Text(r[2],
-                        style: const TextStyle(
-                            color: _cTextPrimary, fontSize: 18))),
+                      style: const TextStyle(
+                        color: _cTextPrimary, fontSize: 14, fontWeight: FontWeight.bold))),
                   ],
                 ))
             .toList(),
@@ -486,11 +486,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(cat,
-                    style: const TextStyle(
-                        color: _cLetterLit,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                        letterSpacing: 1.4)),
+                  style: const TextStyle(
+                    color: _cLetterLit,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    letterSpacing: 1.4)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -509,11 +509,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: items.isEmpty
-                  ? const Text('No hazards',
+                    ? const Text('No hazards',
                       style: TextStyle(
-                          color: Color(0xFF3A5A4A),
-                          fontStyle: FontStyle.italic,
-                          fontSize: 17))
+                        color: Color(0xFF3A5A4A),
+                        fontStyle: FontStyle.italic,
+                        fontSize: 13, fontWeight: FontWeight.bold))
                   : Wrap(
                       spacing: 6,
                       runSpacing: 6,
@@ -530,10 +530,10 @@ class _ReferenceTabState extends State<ReferenceTab> {
                                   color: _cBorderBright.withOpacity(0.5)),
                             ),
                             child: Text(_itemName(item),
-                                style: const TextStyle(
-                                    color: _cGreenFg,
-                                    fontSize: 17,
-                                    letterSpacing: 0.3)),
+                              style: const TextStyle(
+                                color: _cGreenFg,
+                                fontSize: 13,
+                                letterSpacing: 0.3, fontWeight: FontWeight.bold)),
                           ),
                         );
                       }),
@@ -672,7 +672,7 @@ class _ReferenceTabState extends State<ReferenceTab> {
                   value: _removeModalIndex,
                   dropdownColor: const Color(0xFF0A1A10),
                   icon: const Icon(Icons.arrow_drop_down, color: _cLetterLit),
-                  style: const TextStyle(color: _cTextPrimary, fontSize: 19),
+                  style: const TextStyle(color: _cTextPrimary, fontSize: 15, fontWeight: FontWeight.bold),
                   items: List.generate(
                       items.length,
                       (i) => DropdownMenuItem<int>(
@@ -818,12 +818,12 @@ class _ReferenceTabState extends State<ReferenceTab> {
                 children: [
                   Container(width: 3, height: 14, color: _cLetterLit),
                   const SizedBox(width: 8),
-                  Text(title,
+                    Text(title,
                       style: const TextStyle(
-                          color: _cLetterLit,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                          letterSpacing: 2.5)),
+                        color: _cLetterLit,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        letterSpacing: 2.5)),
                 ],
               ),
             ),
@@ -834,33 +834,33 @@ class _ReferenceTabState extends State<ReferenceTab> {
 
   Widget _hudLabel(String text) => Row(
         children: [
-          const Text('▸ ', style: TextStyle(color: _cAccent, fontSize: 10)),
-          Text(text,
+            const Text('▸ ', style: TextStyle(color: _cAccent, fontSize: 6, fontWeight: FontWeight.bold)),
+            Text(text,
               style: const TextStyle(
-                  color: _cTextSub,
-                  fontSize: 15,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w700)),
+                color: _cTextSub,
+                fontSize: 11,
+                letterSpacing: 2,
+                fontWeight: FontWeight.w700)),
         ],
       );
 
-  static Widget _headerText(String t) => Text(t,
+    static Widget _headerText(String t) => Text(t,
       style: const TextStyle(
-          color: _cLetterLit,
-          fontWeight: FontWeight.w800,
-          fontSize: 16,
-          letterSpacing: 1));
+        color: _cLetterLit,
+        fontWeight: FontWeight.w800,
+        fontSize: 12,
+        letterSpacing: 1));
 
-  static Widget _boldCell(String t) => Text(t,
+    static Widget _boldCell(String t) => Text(t,
       style: const TextStyle(
-          color: _cGreenFg, fontWeight: FontWeight.w700, fontSize: 18));
+        color: _cGreenFg, fontWeight: FontWeight.w700, fontSize: 14));
 
-  static Widget _numCell(String t) => Text(t,
+    static Widget _numCell(String t) => Text(t,
       style: const TextStyle(
-          color: _cLetterLit,
-          fontWeight: FontWeight.w900,
-          fontSize: 19,
-          letterSpacing: 1));
+        color: _cLetterLit,
+        fontWeight: FontWeight.w900,
+        fontSize: 15,
+        letterSpacing: 1));
 
   static Widget _smallBtn(
           String label, Color bg, Color txtColor, VoidCallback onPressed) =>
@@ -870,10 +870,10 @@ class _ReferenceTabState extends State<ReferenceTab> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
               color: bg, border: Border.all(color: txtColor.withOpacity(0.4))),
-          child: Text(label,
+            child: Text(label,
               style: TextStyle(
                   color: txtColor,
-                  fontSize: 16,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5)),
         ),
@@ -919,11 +919,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(title,
-                                style: const TextStyle(
-                                    color: _cLetterLit,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 2)),
+                              style: const TextStyle(
+                                color: _cLetterLit,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 2)),
                           ),
                           GestureDetector(
                             onTap: onClose,
@@ -980,11 +980,11 @@ class _ReferenceTabState extends State<ReferenceTab> {
                 color: bg,
                 border: Border.all(color: txtColor.withOpacity(0.4))),
             child: Text(label,
-                style: TextStyle(
-                    color: txtColor,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
-                    letterSpacing: 1)),
+              style: TextStyle(
+                color: txtColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                letterSpacing: 1)),
           ),
         ),
       );
